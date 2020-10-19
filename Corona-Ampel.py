@@ -3,6 +3,7 @@ import datetime
 import locale
 from selenium import webdriver
 
+# Lokalisierung für die korrekte Erkennung der Werte
 locale.setlocale(locale.LC_ALL, 'de_DE.UTF-8')
 
 # Hier die entsprechende Stadt bzw. den Landkreis erfassen gem. den Eintragungen in der Liste
@@ -56,8 +57,10 @@ def main():
     print("Die Corona-Ampel ist somit: " + farbe + "!")
     print(stand.readline())
 
+    Ampelsteuerung(wert, farbe)
 
-# def Ampelsteuerung(wert, farbe):
+def Ampelsteuerung(wert, farbe):
+    
 
 
 
