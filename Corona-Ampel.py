@@ -1,6 +1,9 @@
 import pandas as pd
 import datetime
+import locale
 from selenium import webdriver
+
+locale.setlocale(locale.LC_ALL, 'de_DE.UTF-8')
 
 # Hier die entsprechende Stadt bzw. den Landkreis erfassen gem. den Eintragungen in der Liste
 LOCATION = 'Miltenberg'
@@ -16,14 +19,11 @@ driver = webdriver.Chrome("./Chromedriver/chromedriver", options=options)
 # Download des CSVs
 def load_csv(file):
     # Webseite aufrufen und den Button zum Download des CSVs klicken
-    #driver.get("https://www.lgl.bayern.de/gesundheit/infektionsschutz/infektionskrankheiten_a_z/coronavirus/karte_coronavirus/index.htm")
-    #driver.find_element_by_xpath("//button[@onclick=\"exportTableToCSV('tabelle_04', '#tableLandkreise')\"]").click()
+    driver.get("https://www.lgl.bayern.de/gesundheit/infektionsschutz/infektionskrankheiten_a_z/coronavirus/karte_coronavirus/index.htm")
+    driver.find_element_by_xpath("//button[@onclick=\"exportTableToCSV('tabelle_04', '#tableLandkreise')\"]").click()
 
-    #stand = pd.read_csv(file, nrows=0)
     stand = open(file, 'r')
-    inzidenz = pd.read_csv(file, sep=";", decimal=",", skiprows=1)
-    #print(stand.readline())
-    #print(inzidenz)
+    inzidenz = pd.read_csv(file, sep=";", decimal=",", skiprows=1, header=None)
 
     return stand, inzidenz
 
@@ -39,11 +39,26 @@ def main():
 
     stand, inzidenz = load_csv(file)
 
+    lokaleInzidenz = inzidenz.loc[inzidenz[0] == LOCATION, :]
+    lokaleInzidenz = pd.DataFrame(lokaleInzidenz)
+    lokaleInzidenz.reset_index(drop=True, inplace=True)
+    wert = lokaleInzidenz.loc[0, 5]
+    wert = float(locale.atof(wert))
+
+    if 35.0 <= wert < 50.0:
+        farbe = 'gelb'
+    elif wert >= 50.0:
+        farbe = 'rot'
+    else:
+        farbe = 'grün'
+
+    print("\nDer aktuelle Wert für " + LOCATION + ' ist: ' + str(wert) + "!")
+    print("Die Corona-Ampel ist somit: " + farbe + "!")
     print(stand.readline())
-    lokaleInzidenz = inzidenz.loc[inzidenz['Landkreis/Stadt'] == LOCATION, :]
-    #print(lokaleInzidenz.iloc[0])
-    lokaleInzidenz = pd.Dataframe(lokaleInzidenz)
-    print(lokaleInzidenz['7-Tage-Inzidenz pro 100.000 Einwohner'])
+
+
+# def Ampelsteuerung(wert, farbe):
+
 
 
 # starten, wenn kein Aufruf aus einem anderen Modul kommt, wo das Script importiert ist
