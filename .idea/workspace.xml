@@ -45,7 +45,7 @@
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.Corona-Ampel">
     <configuration name="Corona-Ampel" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Corona-Ampel" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -67,9 +67,53 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="Woche_test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Corona-Ampel" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Woche_test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="zeittest" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Corona-Ampel" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/zeittest.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Python.Corona-Ampel" />
+        <item itemvalue="Python.Woche_test" />
+        <item itemvalue="Python.zeittest" />
       </list>
     </recent_temporary>
   </component>
@@ -101,21 +145,25 @@
       <screen x="0" y="23" width="1280" height="777" />
     </state>
     <state x="341" y="242" key="#Notifications/0.23.1280.777@0.23.1280.777" timestamp="1603125205618" />
-    <state width="1259" height="198" key="GridCell.Tab.0.bottom" timestamp="1603179673467">
+    <state x="352" y="220" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1603188614735">
       <screen x="0" y="23" width="1280" height="777" />
     </state>
-    <state width="1259" height="198" key="GridCell.Tab.0.bottom/0.23.1280.777@0.23.1280.777" timestamp="1603179673467" />
-    <state width="1259" height="198" key="GridCell.Tab.0.center" timestamp="1603179673466">
+    <state x="352" y="220" key="#com.intellij.fileTypes.FileTypeChooser/0.23.1280.777@0.23.1280.777" timestamp="1603188614735" />
+    <state width="1259" height="213" key="GridCell.Tab.0.bottom" timestamp="1603205494170">
       <screen x="0" y="23" width="1280" height="777" />
     </state>
-    <state width="1259" height="198" key="GridCell.Tab.0.center/0.23.1280.777@0.23.1280.777" timestamp="1603179673466" />
-    <state width="1259" height="198" key="GridCell.Tab.0.left" timestamp="1603179673466">
+    <state width="1259" height="213" key="GridCell.Tab.0.bottom/0.23.1280.777@0.23.1280.777" timestamp="1603205494170" />
+    <state width="1259" height="213" key="GridCell.Tab.0.center" timestamp="1603205494169">
       <screen x="0" y="23" width="1280" height="777" />
     </state>
-    <state width="1259" height="198" key="GridCell.Tab.0.left/0.23.1280.777@0.23.1280.777" timestamp="1603179673466" />
-    <state width="1259" height="198" key="GridCell.Tab.0.right" timestamp="1603179673467">
+    <state width="1259" height="213" key="GridCell.Tab.0.center/0.23.1280.777@0.23.1280.777" timestamp="1603205494169" />
+    <state width="1259" height="213" key="GridCell.Tab.0.left" timestamp="1603205494166">
       <screen x="0" y="23" width="1280" height="777" />
     </state>
-    <state width="1259" height="198" key="GridCell.Tab.0.right/0.23.1280.777@0.23.1280.777" timestamp="1603179673467" />
+    <state width="1259" height="213" key="GridCell.Tab.0.left/0.23.1280.777@0.23.1280.777" timestamp="1603205494166" />
+    <state width="1259" height="213" key="GridCell.Tab.0.right" timestamp="1603205494169">
+      <screen x="0" y="23" width="1280" height="777" />
+    </state>
+    <state width="1259" height="213" key="GridCell.Tab.0.right/0.23.1280.777@0.23.1280.777" timestamp="1603205494169" />
   </component>
 </project>
