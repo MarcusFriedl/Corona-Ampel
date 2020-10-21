@@ -8,3 +8,9 @@ Um das Script auf dem Raspberry zu nutzen, müssen evtl. Packages nachinstallier
 
 Pandas: 
 <code>sudo apt-get install python3-pandas</code>
+
+Selenium:
+<code>sudo apt-get install python3-selenium</code>
+
+RPi.GPIO
+<code>sudo apt-get install python3-rpi.gpio</code>
