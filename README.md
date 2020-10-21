@@ -5,4 +5,4 @@ Auf einem Raspberry Pi ist es möglich, den Inzidenz-Wert auf einem Display ausz
 
 Um das Script auf dem Raspberry zu nutzen, müssen evtl. Packages nachinstalliert werden:
 Pandas: 
-<codd>sudo apt-get install python3-pandas</code>
+<code>sudo apt-get install python3-pandas</code>
