@@ -3,6 +3,9 @@ import datetime
 import locale
 import os
 import time
+import json
+import requests
+import urllib.request
 from selenium import webdriver
 
 # Configuration
@@ -12,21 +15,22 @@ locale.setlocale(locale.LC_ALL, 'de_DE.UTF-8')
 # Hier die entsprechende Stadt bzw. den Landkreis erfassen gem. den Eintragungen in der Liste
 LOCATION = 'Miltenberg'
 
-# Dateipfad, wo die CSVs abgelegt werden sollen
+# Dateipfad, wo die CSVs vom LGL abgelegt werden sollen
 PATH = './csvs/'
 
 # Läuft das Script auf dem RPi und ist die Ampel, die Digitalanzeige und/oder die Matrix aktiviert (True/False)?
 RaspberryPi_Ampel = False
+LED_pins = [31, 32, 33]
 RaspberryPi_Digit = False
 RaspberryPi_Matrix = False
 
 if RaspberryPi_Ampel == True | RaspberryPi_Digit == True | RaspberryPi_Matrix == True:
     from RPi import GPIO
-
+    GPIO.setwarnings(False)
 
 def main():
-    # Neue Datei downloaden
-    # download_csv()
+    download_csv()
+    lastUpdate, inzidenz = getJson()
 
     # Prüfen, ob es bereits eine neue Datei von heute gibt, ansonsten die alte öffnen.
     aktuellerTag = datetime.datetime.now()
@@ -67,7 +71,24 @@ def main():
 
     return Aktualisierung
 
-# Download des CSVs
+# Download des JSON vom RKI
+def getJson():
+    try:
+        url = "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=GEN%20%3D%20%27" + LOCATION + "%27&outFields=GEN,last_update,cases7_per_100k&outSR=4326&f=json"
+        r = requests.get(url)
+        result = r.json()
+        # location = result['features'][0]['attributes']['GEN']
+        lastUpdate = result['features'][0]['attributes']['last_update']
+        inzidenz = round(result['features'][0]['attributes']['cases7_per_100k'], 2)
+
+        return lastUpdate, inzidenz
+    except:
+        print('Fehler beim Abrufen der JSON-Daten. Erneuter Versuch.')
+        time.sleep(5)
+        getJson()
+
+
+# Download des CSVs vom LGL
 def download_csv():
     # Webseite aufrufen und den Button zum Download des CSVs klicken
     options = webdriver.ChromeOptions()
@@ -76,7 +97,7 @@ def download_csv():
     options.add_argument('--headless')
     prefs = {"download.default_directory": PATH}
     options.add_experimental_option("prefs", prefs)
-    driver = webdriver.Chrome("./Chromedriver/chromedriver", options=options)
+    driver = webdriver.Chrome("./chromedriver", options=options)
 
     try:
         driver.get("https://www.lgl.bayern.de/gesundheit/infektionsschutz/infektionskrankheiten_a_z/coronavirus/karte_coronavirus/index.htm")
@@ -108,24 +129,23 @@ def extract_inzidenz(inzidenz):
 # LED
 def Ampelsteuerung(farbe):
     # Dies steuert die Ampel auf dem Pi
-    LED_setup()
     if farbe == 'grün':
-        LED_setColor(0,100,0)
+        LED_setColor(100,0,100)
     elif farbe == 'gelb':
-        LED_setColor(100,100,0)
+        LED_setColor(0,0,100)
     elif farbe == 'rot':
-        LED_setColor(100,0,0)
+        LED_setColor(0,100,100)
 
 def LED_setup():
-    # pins = [11, 12, 13]  # define the pins for R:11,G:12,B:13
-    pins = [31, 32, 33]
     global pwmRed, pwmGreen, pwmBlue
+
     GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
-    GPIO.setup(pins, GPIO.OUT)  # set RGBLED pins to OUTPUT mode
-    GPIO.output(pins, GPIO.HIGH)  # make RGBLED pins output HIGH level
-    pwmRed = GPIO.PWM(pins[0], 2000)  # set PWM Frequence to 2kHz
-    pwmGreen = GPIO.PWM(pins[1], 2000)  # set PWM Frequence to 2kHz
-    pwmBlue = GPIO.PWM(pins[2], 2000)  # set PWM Frequence to 2kHz
+    GPIO.setup(LED_pins, GPIO.OUT)  # set RGBLED pins to OUTPUT mode
+    GPIO.output(LED_pins, GPIO.HIGH)  # make RGBLED pins output HIGH level
+
+    pwmRed = GPIO.PWM(LED_pins[0], 2000)  # set PWM Frequence to 2kHz
+    pwmGreen = GPIO.PWM(LED_pins[1], 2000)  # set PWM Frequence to 2kHz
+    pwmBlue = GPIO.PWM(LED_pins[2], 2000)  # set PWM Frequence to 2kHz
     pwmRed.start(0)  # set initial Duty Cycle to 0
     pwmGreen.start(0)
     pwmBlue.start(0)
@@ -265,20 +285,32 @@ def Matrix_loop():
                     time.sleep(0.001)
                     x >>= 1
 
+def destroy():
+    if RaspberryPi_Ampel == True:
+        pwmRed.stop()
+        pwmGreen.stop()
+        pwmBlue.stop()
+        GPIO.cleanup()
+
 # starten, wenn kein Aufruf aus einem anderen Modul kommt, wo das Script importiert ist
 if __name__ == "__main__":
+    if RaspberryPi_Ampel == True:
+        LED_setup()
+
     # Endlosschleife
-    while True:
-        print("\nAktualisierung der Werte am " + datetime.datetime.strftime(datetime.datetime.now(), format="%d.%m.%y, %H:%M Uhr"))
-        Aktualisierung = main()
+    try:
+        while True:
+            print("\nAktualisierung der Werte am " + datetime.datetime.strftime(datetime.datetime.now(), format="%d.%m.%y, %H:%M Uhr"))
+            Aktualisierung = main()
+            uhrzeit = time.localtime()
 
-        uhrzeit = time.localtime()
-
-        if (Aktualisierung == False) & (7 <= uhrzeit.tm_hour <= 20):
-            print("Aktualisierung erfolgt alle 10 Minuten")
-            time.sleep(600)
-        elif uhrzeit.tm_hour >= 21:     # Ab 21 Uhr wird keine Aktualisierung mehr vorgenommen. Das Skript wird per Cronjob morgens erneut gestartet.
-            break
-        else:
-            print("Aktualisierung erfolgt alle 2 Stunden")
-            time.sleep(12000)
+            if (Aktualisierung == False) & (7 <= uhrzeit.tm_hour <= 20):
+                print("Aktualisierung erfolgt alle 10 Minuten")
+                time.sleep(600)
+            elif uhrzeit.tm_hour >= 21:     # Ab 21 Uhr wird keine Aktualisierung mehr vorgenommen. Das Skript wird per Cronjob morgens erneut gestartet.
+                break
+            else:
+                print("Aktualisierung erfolgt alle 2 Stunden")
+                time.sleep(12000)
+    except KeyboardInterrupt:  # Press ctrl-c to end the program.
+        destroy()
