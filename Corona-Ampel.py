@@ -3,9 +3,8 @@ import datetime
 import locale
 import os
 import time
-import json
 import requests
-import urllib.request
+from threading import Thread
 from selenium import webdriver
 
 # Configuration
@@ -18,10 +17,23 @@ LOCATION = 'Miltenberg'
 # Dateipfad, wo die CSVs vom LGL abgelegt werden sollen
 PATH = './csvs/'
 
+# Telegram Chatbot
+CHATBOTURL = 'https://api.telegram.org/bot1238405665:AAH0gx0IE9tuZJN98AC3cSdvK4E70abgz0k/sendmessage?chat_id=-433144245&text='
+
 # Läuft das Script auf dem RPi und ist die Ampel, die Digitalanzeige und/oder die Matrix aktiviert (True/False)?
-RaspberryPi_Ampel = False
+RaspberryPi_Ampel = True
 LED_pins = [31, 32, 33]
-RaspberryPi_Digit = False
+
+RaspberryPi_Digit = True
+dataPin = 18  # DS Pin of 74HC595
+latchPin = 16  # ST_CP Pin of 74HC595
+clockPin = 12  # SH_CP Pin of 74HC595
+digitPin = (11, 13, 15, 19)  # Define the pin of 7-segment display common end
+num = (0xc0, 0xf9, 0xa4, 0xb0, 0x99, 0x92, 0x82, 0xf8, 0x80, 0x90)
+num2 = (0x80, 0x79, 0x24, 0x60, 0x19, 0x22, 0x02, 0x78, 0x00, 0x10)
+LSBFIRST = 1
+MSBFIRST = 2
+
 RaspberryPi_Matrix = False
 
 if RaspberryPi_Ampel == True | RaspberryPi_Digit == True | RaspberryPi_Matrix == True:
@@ -29,43 +41,59 @@ if RaspberryPi_Ampel == True | RaspberryPi_Digit == True | RaspberryPi_Matrix ==
     GPIO.setwarnings(False)
 
 def main():
-    download_csv()
-    lastUpdate, inzidenz = getJson()
+    # Daten besorgen
+    Aktualisierung, stand, LGL_inzidenz, LGL_wert = download_csv()
+    lastUpdate, RKI_inzidenz = getJson()
 
-    # Prüfen, ob es bereits eine neue Datei von heute gibt, ansonsten die alte öffnen.
-    aktuellerTag = datetime.datetime.now()
-    aktuellerTag = aktuellerTag.strftime(format="%Y%m%d")
-
-    newfile = "tabelle_04_" + aktuellerTag + ".csv"  # Welches CSV müsste das neuste sein?
-    file = max(os.listdir(PATH))                     # Welches CSV ist das aktuellste im Verzeichnis?
-
-    print("Neuste CSV-Datei: ", file)
-
-    if newfile != file:
-        print("Heute noch keine Aktualisierung.")
-        Aktualisierung = False
+    # LGL-Farbe errechnen
+    if 35.0 <= LGL_wert < 50.0:
+        LGL_farbe = 'gelb'
+    elif LGL_wert >= 50.0:
+        LGL_farbe = 'rot'
     else:
-        Aktualisierung = True
+        LGL_farbe = 'grün'
 
-    stand, inzidenz = load_csv(file)
-    wert = extract_inzidenz(inzidenz)
-
-    if 35.0 <= wert < 50.0:
-        farbe = 'gelb'
-    elif wert >= 50.0:
-        farbe = 'rot'
+    # RKI-Farbe errechnen
+    if 35.0 <= RKI_inzidenz < 50.0:
+        RKI_farbe = 'gelb'
+    elif RKI_inzidenz >= 50.0:
+        RKI_farbe = 'rot'
     else:
-        farbe = 'grün'
+        RKI_farbe = 'grün'
 
-    print("\nDer aktuelle Wert für " + LOCATION + ' ist: ' + str(wert) + "!")
-    print("Die Corona-Ampel ist somit: " + farbe + "!")
-    print(stand.readline())
+    print("\nDer aktuelle Wert des LGL für " + LOCATION + ' ist: ' + str(LGL_wert) + "!")
+    print("Die Corona-Ampel ist somit: " + LGL_farbe + "!")
+    standLGL = stand.readline()
+    print(standLGL)
+    chaturlLGL=CHATBOTURL + 'Der Wert des LGL ist: ' + str(LGL_wert) + '! Somit ist die Ampel: ' + LGL_farbe + '!\n' + standLGL
+    requests.post(chaturlLGL)
+    print("Der aktuelle Wert des RKI für " + LOCATION + ' ist: ' + str(RKI_inzidenz) + "!")
+    print('Stand:', lastUpdate)
+    print("Die Corona-Ampel ist somit: " + RKI_farbe + "!")
+    chaturlRKI=CHATBOTURL + 'Der Wert des RKI ist: ' + str(RKI_inzidenz) + '! Somit ist die Ampel: ' + RKI_farbe + '!\nStand: ' + lastUpdate
+    requests.post(chaturlRKI)
+
+
+    #if LGL_wert > RKI_inzidenz:
+    #    wert = LGL_wert
+    #    farbe = LGL_farbe
+    #else:
+    #    wert = RKI_inzidenz
+    #    farbe = RKI_farbe
+
+    if Aktualisierung == False:
+        wert = RKI_inzidenz
+        farbe = RKI_farbe
+    else:
+        wert = LGL_wert
+        farbe = LGL_farbe
 
     # Steuerung der Ampel und der Digitalanzeige auf dem Raspberry Pi
     if RaspberryPi_Ampel == True:
         Ampelsteuerung(farbe)
     if RaspberryPi_Digit == True:
-        Anzeige(wert)
+        t = Thread(target=Anzeige, args=((int(wert*100), wert)))
+        t.start()
     if RaspberryPi_Matrix == True:
         Matrix()
 
@@ -79,14 +107,14 @@ def getJson():
         result = r.json()
         # location = result['features'][0]['attributes']['GEN']
         lastUpdate = result['features'][0]['attributes']['last_update']
-        inzidenz = round(result['features'][0]['attributes']['cases7_per_100k'], 2)
+        RKI_inzidenz = round(result['features'][0]['attributes']['cases7_per_100k'], 2)
 
-        return lastUpdate, inzidenz
+        print('JSON-Retrieve erfolgreich.')
+        return lastUpdate, RKI_inzidenz
     except:
         print('Fehler beim Abrufen der JSON-Daten. Erneuter Versuch.')
         time.sleep(5)
         getJson()
-
 
 # Download des CSVs vom LGL
 def download_csv():
@@ -97,19 +125,39 @@ def download_csv():
     options.add_argument('--headless')
     prefs = {"download.default_directory": PATH}
     options.add_experimental_option("prefs", prefs)
-    driver = webdriver.Chrome("./chromedriver", options=options)
+    if RaspberryPi_Ampel == True:
+        driver = webdriver.Chrome("chromedriver", options=options)
+    else:
+        driver = webdriver.Chrome("./chromedriver", options=options)
 
     try:
         driver.get("https://www.lgl.bayern.de/gesundheit/infektionsschutz/infektionskrankheiten_a_z/coronavirus/karte_coronavirus/index.htm")
         driver.find_element_by_xpath("//button[@onclick=\"exportTableToCSV('tabelle_04', '#tableLandkreise')\"]").click()
-        print('Download erfolgreich')
+        print('CSV-Download erfolgreich')
     except:
         print('Fehler beim Abrufen der CSV-Datei. Erneuter Versuch.')
         time.sleep(5)
         download_csv()
 
     time.sleep(2)
-    return
+
+    # Prüfen, ob es bereits eine neue Datei von heute gibt, ansonsten die alte öffnen.
+    aktuellerTag = datetime.datetime.now()
+    aktuellerTag = aktuellerTag.strftime(format="%Y%m%d")
+
+    newfile = "tabelle_04_" + aktuellerTag + ".csv"  # Welches CSV müsste das neuste sein?
+    file = max(os.listdir(PATH))  # Welches CSV ist das aktuellste im Verzeichnis?
+
+    if newfile != file:
+        print("Heute ist noch keine Aktualisierung durch das LGL Bayern erfolgt.\nEs wird der Wert von gestern angezeigt")
+        Aktualisierung = False
+    else:
+        Aktualisierung = True
+
+    stand, LGL_inzidenz = load_csv(file)
+    wert = extract_inzidenz(LGL_inzidenz)
+
+    return Aktualisierung, stand, LGL_inzidenz, wert
 
 def load_csv(file):
     stand = open(PATH + file, 'r')
@@ -117,14 +165,14 @@ def load_csv(file):
 
     return stand, inzidenz
 
-def extract_inzidenz(inzidenz):
-    lokaleInzidenz = inzidenz.loc[inzidenz[0] == LOCATION, :]
+def extract_inzidenz(LGL_inzidenz):
+    lokaleInzidenz = LGL_inzidenz.loc[LGL_inzidenz[0] == LOCATION, :]
     lokaleInzidenz = pd.DataFrame(lokaleInzidenz)
     lokaleInzidenz.reset_index(drop=True, inplace=True)
-    wert = lokaleInzidenz.loc[0, 5]
-    wert = float(locale.atof(wert))
+    LGL_wert = lokaleInzidenz.loc[0, 5]
+    LGL_wert = float(locale.atof(LGL_wert))
 
-    return wert
+    return LGL_wert
 
 # LED
 def Ampelsteuerung(farbe):
@@ -156,47 +204,65 @@ def LED_setColor(r_val, g_val, b_val):  # change duty cycle for three pins to r_
     pwmBlue.ChangeDutyCycle(b_val)
 
 # Display
-def Anzeige(wert):
+def Anzeige(dec, wert):
     Digit_setup()
+    while True:
+        Digit_display(dec, wert)
 
 def Digit_setup():
-    # define the pins for 74HC595
-    dataPin = 11  # DS Pin of 74HC595(Pin14)
-    latchPin = 13  # ST_CP Pin of 74HC595(Pin12)
-    clockPin = 15  # CH_CP Pin of 74HC595(Pin11)
-    # Zahlen von 0-9
-    # TODO: Für alle Zahlen noch eine Version mit . anlegen
-    num = [0xc0, 0xf9, 0xa4, 0xb0, 0x99, 0x92, 0x82, 0xf8, 0x80, 0x90]
-
     GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
-    GPIO.setup(dataPin, GPIO.OUT)
+    GPIO.setup(dataPin, GPIO.OUT)  # Set pin mode to OUTPUT
     GPIO.setup(latchPin, GPIO.OUT)
     GPIO.setup(clockPin, GPIO.OUT)
+    for pin in digitPin:
+        GPIO.setup(pin, GPIO.OUT)
 
-def Digit_shiftOut(dPin, cPin, order, val):
-    LSBFIRST = 1
-    MSBFIRST = 2
+def Digit_shiftOut(dPin,cPin,order,val):
+    for i in range(0,8):
+        GPIO.output(cPin,GPIO.LOW);
+        if(order == LSBFIRST):
+            GPIO.output(dPin,(0x01&(val>>i)==0x01) and GPIO.HIGH or GPIO.LOW)
+        elif(order == MSBFIRST):
+            GPIO.output(dPin,(0x80&(val<<i)==0x80) and GPIO.HIGH or GPIO.LOW)
+        GPIO.output(cPin,GPIO.HIGH)
 
-    for i in range(0, 8):
-        GPIO.output(cPin, GPIO.LOW)
-        if (order == LSBFIRST):
-            GPIO.output(dPin, (0x01 & (val >> i) == 0x01) and GPIO.HIGH or GPIO.LOW)
-        elif (order == MSBFIRST):
-            GPIO.output(dPin, (0x80 & (val << i) == 0x80) and GPIO.HIGH or GPIO.LOW)
-        GPIO.output(cPin, GPIO.HIGH)
+def Digit_outData(data):  # function used to output data for 74HC595
+    GPIO.output(latchPin, GPIO.LOW)
+    Digit_shiftOut(dataPin, clockPin, MSBFIRST, data)
+    GPIO.output(latchPin, GPIO.HIGH)
 
-def Digit_loop():
-    while True:
-        for i in range(0, len(num)):
-            GPIO.output(latchPin, GPIO.LOW)
-            shiftOut(dataPin, clockPin, MSBFIRST, num[i])  # Send serial data to 74HC595
-            GPIO.output(latchPin, GPIO.HIGH)
-            time.sleep(0.5)
-        for i in range(0, len(num)):
-            GPIO.output(latchPin, GPIO.LOW)
-            shiftOut(dataPin, clockPin, MSBFIRST, num[i] & 0x7f)  # Use "&0x7f" to display the decimal point.
-            GPIO.output(latchPin, GPIO.HIGH)
-            time.sleep(0.5)
+def Digit_selectDigit(digit):  # Open one of the 7-segment display and close the remaining three, the parameter digit is optional for 1,2,4,8
+    GPIO.output(digitPin[0], GPIO.LOW if ((digit & 0x08) == 0x08) else GPIO.HIGH)
+    GPIO.output(digitPin[1], GPIO.LOW if ((digit & 0x04) == 0x04) else GPIO.HIGH)
+    GPIO.output(digitPin[2], GPIO.LOW if ((digit & 0x02) == 0x02) else GPIO.HIGH)
+    GPIO.output(digitPin[3], GPIO.LOW if ((digit & 0x01) == 0x01) else GPIO.HIGH)
+
+def Digit_display(dec, wert):  # display function for 7-segment display
+    Digit_outData(0xff)  # eliminate residual display
+    Digit_selectDigit(0x01)  # Select the first, and display the single digit
+    Digit_outData(num[dec % 10])
+    time.sleep(0.003)  # display duration
+
+    Digit_outData(0xff)
+    Digit_selectDigit(0x02)  # Select the second, and display the tens digit
+    if wert >= 100:
+        Digit_outData(num2[dec % 100 // 10])
+    else:
+        Digit_outData(num[dec % 100 // 10])
+    time.sleep(0.003)
+
+    Digit_outData(0xff)
+    Digit_selectDigit(0x04)  # Select the third, and display the hundreds digit
+    if wert >= 10:
+        Digit_outData(num2[dec % 1000 // 100])
+    else:
+        Digit_outData(num[dec % 1000 // 100])
+    time.sleep(0.003)
+
+    Digit_outData(0xff)
+    Digit_selectDigit(0x08)  # Select the fourth, and display the thousands digit
+    Digit_outData(num[dec % 10000 // 1000])
+    time.sleep(0.003)
 
 # Matrix
 def Matrix():
@@ -290,12 +356,15 @@ def destroy():
         pwmRed.stop()
         pwmGreen.stop()
         pwmBlue.stop()
-        GPIO.cleanup()
+
+    GPIO.cleanup()
 
 # starten, wenn kein Aufruf aus einem anderen Modul kommt, wo das Script importiert ist
 if __name__ == "__main__":
     if RaspberryPi_Ampel == True:
         LED_setup()
+    if RaspberryPi_Digit == True:
+        Digit_setup()
 
     # Endlosschleife
     try:
@@ -305,12 +374,13 @@ if __name__ == "__main__":
             uhrzeit = time.localtime()
 
             if (Aktualisierung == False) & (7 <= uhrzeit.tm_hour <= 20):
-                print("Aktualisierung erfolgt alle 10 Minuten")
+                print("\nAktualisierung erfolgt alle 10 Minuten")
                 time.sleep(600)
             elif uhrzeit.tm_hour >= 21:     # Ab 21 Uhr wird keine Aktualisierung mehr vorgenommen. Das Skript wird per Cronjob morgens erneut gestartet.
+                exit()
                 break
             else:
-                print("Aktualisierung erfolgt alle 2 Stunden")
+                print("\nAktualisierung erfolgt alle 2 Stunden")
                 time.sleep(12000)
     except KeyboardInterrupt:  # Press ctrl-c to end the program.
         destroy()
