@@ -9,11 +9,14 @@ Um das Script auf dem Raspberry zu nutzen, müssen evtl. Packages nachinstallier
 Pandas: 
 <code>sudo apt-get install python3-pandas</code>
 
-Selenium:
+Selenium (für CSV-Download):
 <code>sudo apt-get install python3-selenium</code>
 
-Chromedriver:
+Chromedriver (für CSV-Download):
 <code>sudo apt-get install chromium-chromedriver</code>
 
-RPi.GPIO
+RPi.GPIO (für die Raspberry-Ampel):
 <code>sudo apt-get install python3-rpi.gpio</code>
+
+Telegram-Bot (für Telegram):
+<code>pip3 install python-telegram-bot
