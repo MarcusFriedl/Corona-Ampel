@@ -493,17 +493,18 @@ if __name__ == "__main__":
             AktualisierungLGL = main()
             uhrzeit = time.localtime()
 
-            if (AktualisierungLGL == False) & (14 <= uhrzeit.tm_hour <= 15):
+            if (AktualisierungLGL == False) & (14 <= uhrzeit.tm_hour <= 16):
                 print("\nAktualisierung erfolgt alle 10 Minuten")
                 time.sleep(600)
-            elif 15 < uhrzeit.tm_hour < 20:
+            elif (5 < uhrzeit.tm_hour < 14) | (16 < uhrzeit.tm_hour < 20):
                 print("\nAktualisierung erfolgt jede 1 Stunde")
                 time.sleep(3600)
-            elif (20 <= uhrzeit.tm_hour <= 23) | (0 <= uhrzeit.tm_hour <=5):
+            elif (20 <= uhrzeit.tm_hour <= 23) | (0 <= uhrzeit.tm_hour <=4):
                 destroy()   # Ampel abschalten
+                time.sleep(3600)
             else:
                 destroy()
-                exit()
+                exit() # Das Script muss ausgeschaltet werden, so dass es per Cronjob erneut gestartet werden kann
                 break
     except KeyboardInterrupt:  # Press ctrl-c to end the program.
         destroy()
