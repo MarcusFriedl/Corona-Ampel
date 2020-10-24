@@ -6,6 +6,7 @@ import time
 import requests
 from threading import Thread
 from selenium import webdriver
+import telepot
 
 # Configuration
 # Lokalisierung für die korrekte Erkennung der Werte
@@ -18,7 +19,8 @@ LOCATION = 'Miltenberg'
 PATH = './csvs/'
 
 # Telegram Chatbot
-CHATBOTURL = 'https://api.telegram.org/bot1238405665:AAH0gx0IE9tuZJN98AC3cSdvK4E70abgz0k/sendmessage?chat_id=-433144245&text='
+API_KEY = '1238405665:AAH0gx0IE9tuZJN98AC3cSdvK4E70abgz0k'
+CHATBOTURL = 'https://api.telegram.org/bot' + API_KEY + '/sendmessage?chat_id=-433144245&text='
 TelegramMessageLGL = False
 TelegramMessageRKI = False
 
@@ -49,7 +51,7 @@ if RaspberryPi_Ampel == True | RaspberryPi_Digit == True | RaspberryPi_Matrix ==
     GPIO.setwarnings(False)
 
 def main():
-    global TelegramMessageLGL, TelegramMessageRKI, DigitWert, Servo
+    global TelegramMessageLGL, TelegramMessageRKI, DigitWert, Servo, LGL_wert, standLGL, RKI_inzidenz, lastUpdate, LGL_farbe, RKI_farbe
 
     # Daten besorgen
     AktualisierungLGL, stand, LGL_inzidenz, LGL_wert = download_csv()
@@ -85,15 +87,23 @@ def main():
     print("Die Corona-Ampel ist somit: " + RKI_farbe + "!")
     print('Stand:', lastUpdate)
 
+    # Telegram-Bot
+    # Bot starten
+    try:
+        bot.message_loop({'chat': Telegrambot})
+        print('Telegram-Bot gestartet')
+    except:
+        pass
+
     # Ausgabe auf dem Telegram-Bot
     if (AktualisierungLGL == True) & (TelegramMessageLGL == False):
         chaturlLGL = CHATBOTURL + 'Der Wert des LGL ist: ' + str(LGL_wert) + '!\nSomit ist die Ampel: ' + LGL_farbe + '!\n' + standLGL
-     #   requests.post(chaturlLGL)
+        requests.post(chaturlLGL)
         TelegramMessageLGL = True
 
     if (AktualisierungRKI == True) & (TelegramMessageRKI == False):
         chaturlRKI = CHATBOTURL + 'Der Wert des RKI ist: ' + str(RKI_inzidenz) + '!\nSomit ist die Ampel: ' + RKI_farbe + '!\nStand: ' + lastUpdate
-     #   requests.post(chaturlRKI)
+        requests.post(chaturlRKI)
         TelegramMessageRKI = True
 
     # Ausgabe auf der Ampel und der Digitalanzeige
@@ -114,19 +124,21 @@ def main():
     # Steuerung der Ampel und der Digitalanzeige auf dem Raspberry Pi
     if RaspberryPi_Ampel == True:
         Ampelsteuerung(farbe)
+
     if RaspberryPi_Digit == True:
         try:
             t.stop()
         except:
             pass
-
         t = Thread(target=Anzeige, args=())
         t.start()
+
     if RaspberryPi_Servo == True:
         if Servo == 'RKI':
             servoWrite(0)
         elif Servo == 'LGL':
             servoWrite(180)
+
     if RaspberryPi_Matrix == True:
         Matrix()
 
@@ -228,6 +240,8 @@ def Ampelsteuerung(farbe):
         LED_setColor(0,0,100)
     elif farbe == 'rot':
         LED_setColor(0,100,100)
+    elif farbe == 'dunkelrot':
+        LED_setColor(0,30,30)
 
 def LED_setup():
     global pwmRed, pwmGreen, pwmBlue
@@ -435,6 +449,30 @@ def destroy():
 
     GPIO.cleanup()
 
+# Telegram-Bot
+def Telegrambot(msg):
+    try:
+        content_type, chat_type, chat_id = telepot.glance(msg)
+        if content_type == 'text':
+            user_id = msg['chat']['id']
+            if msg['text'] in ["/rki", "/RKI", "/Rki"]:
+                bot.sendMessage(user_id, "Der Wert vom RKI ist " + str(RKI_inzidenz) + ".\nDie Ampelfarbe ist " + RKI_farbe + ".\nStand: " + lastUpdate)
+
+            elif msg['text'] in ["/lgl", "/LGL", "/Lgl", "Bayern"]:
+                bot.sendMessage(user_id, "Der Wert vom LGL ist " + str(LGL_wert) + ".\nDie Ampelfarbe ist " + LGL_farbe + ".\n" + standLGL)
+
+            elif msg['text'] in ["/regeln", "/wasgilt"]:
+                bot.sendMessage(user_id, "Hier gibts weitere Infos: https://www.stmgp.bayern.de/coronavirus/")
+
+            elif msg['text'] in ["/help", "/?"]:
+                bot.sendMessage(user_id, "Folgende Befehle sind möglich:\n/rki - um die aktuellen Zahlen des RKI abzurufen.\n/lgl - um die aktuellen Zahlen des LGL abzurufen.\n/regeln - um einen Link auf die geltenden Regeln zu erhalten.")
+
+            elif msg['text'].startswith("/"):
+                bot.sendMessage(user_id, "Mit dem Befehl `" + msg['text'] + "` kann ich leider nichts anfangen.")
+                bot.sendMessage(user_id, "Ich verstehe nur /rki und /lgl.")
+    except telepot.exception.BotWasBlockedError:
+        pass
+
 # starten, wenn kein Aufruf aus einem anderen Modul kommt, wo das Script importiert ist
 if __name__ == "__main__":
     if RaspberryPi_Ampel == True:
@@ -444,6 +482,9 @@ if __name__ == "__main__":
     if RaspberryPi_Servo == True:
         Servo_setup()
 
+    # Set up Telegram Bot
+    bot = telepot.Bot(API_KEY)
+
     # Endlosschleife
     try:
         while True:
@@ -452,15 +493,17 @@ if __name__ == "__main__":
             AktualisierungLGL = main()
             uhrzeit = time.localtime()
 
-            if (AktualisierungLGL == False) & (7 <= uhrzeit.tm_hour <= 20):
+            if (AktualisierungLGL == False) & (14 <= uhrzeit.tm_hour <= 15):
                 print("\nAktualisierung erfolgt alle 10 Minuten")
                 time.sleep(600)
-            elif uhrzeit.tm_hour > 20:     # Ab 20 Uhr wird keine Aktualisierung mehr vorgenommen. Das Skript wird per Cronjob morgens erneut gestartet.
+            elif 15 < uhrzeit.tm_hour < 20:
+                print("\nAktualisierung erfolgt jede 1 Stunde")
+                time.sleep(3600)
+            elif (20 <= uhrzeit.tm_hour <= 23) | (0 <= uhrzeit.tm_hour <=5):
+                destroy()   # Ampel abschalten
+            else:
                 destroy()
                 exit()
                 break
-            else:
-                print("\nAktualisierung erfolgt alle 2 Stunden")
-                time.sleep(12000)
     except KeyboardInterrupt:  # Press ctrl-c to end the program.
         destroy()
