@@ -19,6 +19,8 @@ PATH = './csvs/'
 
 # Telegram Chatbot
 CHATBOTURL = 'https://api.telegram.org/bot1238405665:AAH0gx0IE9tuZJN98AC3cSdvK4E70abgz0k/sendmessage?chat_id=-433144245&text='
+TelegramMessageLGL = False
+TelegramMessageRKI = False
 
 # Läuft das Script auf dem RPi und ist die Ampel, die Digitalanzeige und/oder die Matrix aktiviert (True/False)?
 RaspberryPi_Ampel = True
@@ -36,68 +38,101 @@ MSBFIRST = 2
 
 RaspberryPi_Matrix = False
 
+RaspberryPi_Servo = True
+OFFSE_DUTY = 0.5        #define pulse offset of servo
+SERVO_MIN_DUTY = 2.5+OFFSE_DUTY     #define pulse duty cycle for minimum angle of servo
+SERVO_MAX_DUTY = 12.5+OFFSE_DUTY    #define pulse duty cycle for maximum angle of servo
+servoPin = 35
+
 if RaspberryPi_Ampel == True | RaspberryPi_Digit == True | RaspberryPi_Matrix == True:
     from RPi import GPIO
     GPIO.setwarnings(False)
 
 def main():
+    global TelegramMessageLGL, TelegramMessageRKI, DigitWert, Servo
+
     # Daten besorgen
-    Aktualisierung, stand, LGL_inzidenz, LGL_wert = download_csv()
-    lastUpdate, RKI_inzidenz = getJson()
+    AktualisierungLGL, stand, LGL_inzidenz, LGL_wert = download_csv()
+    lastUpdate, RKI_inzidenz, AktualisierungRKI = getJson()
 
     # LGL-Farbe errechnen
-    if 35.0 <= LGL_wert < 50.0:
-        LGL_farbe = 'gelb'
-    elif LGL_wert >= 50.0:
+    if LGL_wert >= 100.0:
+        LGL_farbe = 'dunkelrot'
+    elif 50.0 <= LGL_wert < 100.0:
         LGL_farbe = 'rot'
+    elif 35.0 <= LGL_wert < 50.0:
+        LGL_farbe = 'gelb'
     else:
         LGL_farbe = 'grün'
 
     # RKI-Farbe errechnen
-    if 35.0 <= RKI_inzidenz < 50.0:
-        RKI_farbe = 'gelb'
-    elif RKI_inzidenz >= 50.0:
+    if RKI_inzidenz >= 100.0:
+        RKI_farbe = 'dunkelrot'
+    elif 50.0 <= RKI_inzidenz < 100.0:
         RKI_farbe = 'rot'
+    elif 35.0 <= RKI_inzidenz < 50.0:
+        RKI_farbe = 'gelb'
     else:
         RKI_farbe = 'grün'
 
+    # Ausgabe der Werte auf allen Kanälen
+    # Ausgabe in der Konsole
     print("\nDer aktuelle Wert des LGL für " + LOCATION + ' ist: ' + str(LGL_wert) + "!")
     print("Die Corona-Ampel ist somit: " + LGL_farbe + "!")
     standLGL = stand.readline()
     print(standLGL)
-    chaturlLGL=CHATBOTURL + 'Der Wert des LGL ist: ' + str(LGL_wert) + '! Somit ist die Ampel: ' + LGL_farbe + '!\n' + standLGL
-    requests.post(chaturlLGL)
     print("Der aktuelle Wert des RKI für " + LOCATION + ' ist: ' + str(RKI_inzidenz) + "!")
-    print('Stand:', lastUpdate)
     print("Die Corona-Ampel ist somit: " + RKI_farbe + "!")
-    chaturlRKI=CHATBOTURL + 'Der Wert des RKI ist: ' + str(RKI_inzidenz) + '! Somit ist die Ampel: ' + RKI_farbe + '!\nStand: ' + lastUpdate
-    requests.post(chaturlRKI)
+    print('Stand:', lastUpdate)
 
+    # Ausgabe auf dem Telegram-Bot
+    if (AktualisierungLGL == True) & (TelegramMessageLGL == False):
+        chaturlLGL = CHATBOTURL + 'Der Wert des LGL ist: ' + str(LGL_wert) + '!\nSomit ist die Ampel: ' + LGL_farbe + '!\n' + standLGL
+     #   requests.post(chaturlLGL)
+        TelegramMessageLGL = True
 
-    #if LGL_wert > RKI_inzidenz:
-    #    wert = LGL_wert
-    #    farbe = LGL_farbe
-    #else:
-    #    wert = RKI_inzidenz
-    #    farbe = RKI_farbe
+    if (AktualisierungRKI == True) & (TelegramMessageRKI == False):
+        chaturlRKI = CHATBOTURL + 'Der Wert des RKI ist: ' + str(RKI_inzidenz) + '!\nSomit ist die Ampel: ' + RKI_farbe + '!\nStand: ' + lastUpdate
+     #   requests.post(chaturlRKI)
+        TelegramMessageRKI = True
 
-    if Aktualisierung == False:
-        wert = RKI_inzidenz
+    # Ausgabe auf der Ampel und der Digitalanzeige
+    # Definition welcher Wert auf der Ampel und der Anzeige ausgegeben wird
+    if (AktualisierungLGL == False) & (RKI_inzidenz > LGL_wert):
         farbe = RKI_farbe
-    else:
-        wert = LGL_wert
+        DigitWert = RKI_inzidenz
+        Servo = 'RKI'
+    elif (AktualisierungLGL == False) & (RKI_inzidenz <= LGL_wert):
         farbe = LGL_farbe
+        DigitWert = LGL_wert
+        Servo = 'LGL'
+    else:
+        farbe = LGL_farbe
+        DigitWert = LGL_wert
+        Servo = 'LGL'
 
     # Steuerung der Ampel und der Digitalanzeige auf dem Raspberry Pi
     if RaspberryPi_Ampel == True:
         Ampelsteuerung(farbe)
     if RaspberryPi_Digit == True:
-        t = Thread(target=Anzeige, args=((int(wert*100), wert)))
+        try:
+            t.stop()
+        except:
+            pass
+
+        t = Thread(target=Anzeige, args=())
         t.start()
+    if RaspberryPi_Servo == True:
+        if Servo == 'RKI':
+            servoWrite(0)
+        elif Servo == 'LGL':
+            servoWrite(180)
     if RaspberryPi_Matrix == True:
         Matrix()
 
-    return Aktualisierung
+    # Bescheid geben, ob eine Aktualisierung des LGL erfolgt ist, oder nicht.
+    # Bis die Aktualisierung erfolgt ist, wird alle 10 Minuten gecheckt. Danach nur noch alle 2 Stunden.
+    return AktualisierungLGL
 
 # Download des JSON vom RKI
 def getJson():
@@ -110,7 +145,16 @@ def getJson():
         RKI_inzidenz = round(result['features'][0]['attributes']['cases7_per_100k'], 2)
 
         print('JSON-Retrieve erfolgreich.')
-        return lastUpdate, RKI_inzidenz
+
+        aktuellerTag = datetime.datetime.now()
+        # aktuellerTag = aktuellerTag.strftime(format="%Y%m%d")
+
+        if lastUpdate == aktuellerTag.strftime(format="%d.%m.%Y") + ', 00:00 Uhr':
+            AktualisierungRKI = True
+        else:
+            AktualisierungRKI = False
+
+        return lastUpdate, RKI_inzidenz, AktualisierungRKI
     except:
         print('Fehler beim Abrufen der JSON-Daten. Erneuter Versuch.')
         time.sleep(5)
@@ -120,13 +164,14 @@ def getJson():
 def download_csv():
     # Webseite aufrufen und den Button zum Download des CSVs klicken
     options = webdriver.ChromeOptions()
+    options.add_argument('--no-sandbox')
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--incognito')
     options.add_argument('--headless')
     prefs = {"download.default_directory": PATH}
     options.add_experimental_option("prefs", prefs)
     if RaspberryPi_Ampel == True:
-        driver = webdriver.Chrome("chromedriver", options=options)
+        driver = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver", options=options)
     else:
         driver = webdriver.Chrome("./chromedriver", options=options)
 
@@ -150,20 +195,20 @@ def download_csv():
 
     if newfile != file:
         print("Heute ist noch keine Aktualisierung durch das LGL Bayern erfolgt.\nEs wird der Wert von gestern angezeigt")
-        Aktualisierung = False
+        AktualisierungLGL = False
     else:
-        Aktualisierung = True
+        AktualisierungLGL = True
 
     stand, LGL_inzidenz = load_csv(file)
-    wert = extract_inzidenz(LGL_inzidenz)
+    LGL_wert = extract_inzidenz(LGL_inzidenz)
 
-    return Aktualisierung, stand, LGL_inzidenz, wert
+    return AktualisierungLGL, stand, LGL_inzidenz, LGL_wert
 
 def load_csv(file):
     stand = open(PATH + file, 'r')
-    inzidenz = pd.read_csv(PATH + file, sep=";", decimal=",", skiprows=1, header=None)
+    LGL_inzidenz = pd.read_csv(PATH + file, sep=";", decimal=",", skiprows=1, header=None)
 
-    return stand, inzidenz
+    return stand, LGL_inzidenz
 
 def extract_inzidenz(LGL_inzidenz):
     lokaleInzidenz = LGL_inzidenz.loc[LGL_inzidenz[0] == LOCATION, :]
@@ -204,8 +249,11 @@ def LED_setColor(r_val, g_val, b_val):  # change duty cycle for three pins to r_
     pwmBlue.ChangeDutyCycle(b_val)
 
 # Display
-def Anzeige(dec, wert):
-    Digit_setup()
+def Anzeige():
+    #global DigitWert
+    wert = DigitWert
+    dec = int(DigitWert*100)
+
     while True:
         Digit_display(dec, wert)
 
@@ -351,11 +399,39 @@ def Matrix_loop():
                     time.sleep(0.001)
                     x >>= 1
 
+# Servo steuern
+def Servo_map(value, fromLow, fromHigh, toLow, toHigh):  # map a value from one range to another range
+    return (toHigh - toLow) * (value - fromLow) / (fromHigh - fromLow) + toLow
+
+def Servo_setup():
+    global p
+
+    GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
+    GPIO.setup(servoPin, GPIO.OUT)  # Set servoPin to OUTPUT mode
+    GPIO.output(servoPin, GPIO.LOW)  # Make servoPin output LOW level
+
+    p = GPIO.PWM(servoPin, 50)  # set Frequence to 50Hz
+    p.start(0)  # Set initial Duty Cycle to 0
+
+def servoWrite(angle):  # make the servo rotate to specific angle, 0-180
+    p.ChangeDutyCycle(Servo_map(angle, 0, 180, SERVO_MIN_DUTY, SERVO_MAX_DUTY))  # map the angle to duty cycle and output it
+    time.sleep(0.5)
+    p.stop()
+
 def destroy():
     if RaspberryPi_Ampel == True:
         pwmRed.stop()
         pwmGreen.stop()
         pwmBlue.stop()
+
+    if RaspberryPi_Digit == True:
+        GPIO.output(digitPin[0], GPIO.LOW)
+        GPIO.output(digitPin[1], GPIO.LOW)
+        GPIO.output(digitPin[2], GPIO.LOW)
+        GPIO.output(digitPin[3], GPIO.LOW)
+
+    if RaspberryPi_Servo == True:
+        p.stop()
 
     GPIO.cleanup()
 
@@ -365,18 +441,22 @@ if __name__ == "__main__":
         LED_setup()
     if RaspberryPi_Digit == True:
         Digit_setup()
+    if RaspberryPi_Servo == True:
+        Servo_setup()
 
     # Endlosschleife
     try:
         while True:
             print("\nAktualisierung der Werte am " + datetime.datetime.strftime(datetime.datetime.now(), format="%d.%m.%y, %H:%M Uhr"))
-            Aktualisierung = main()
+
+            AktualisierungLGL = main()
             uhrzeit = time.localtime()
 
-            if (Aktualisierung == False) & (7 <= uhrzeit.tm_hour <= 20):
+            if (AktualisierungLGL == False) & (7 <= uhrzeit.tm_hour <= 20):
                 print("\nAktualisierung erfolgt alle 10 Minuten")
                 time.sleep(600)
-            elif uhrzeit.tm_hour >= 21:     # Ab 21 Uhr wird keine Aktualisierung mehr vorgenommen. Das Skript wird per Cronjob morgens erneut gestartet.
+            elif uhrzeit.tm_hour > 20:     # Ab 20 Uhr wird keine Aktualisierung mehr vorgenommen. Das Skript wird per Cronjob morgens erneut gestartet.
+                destroy()
                 exit()
                 break
             else:
