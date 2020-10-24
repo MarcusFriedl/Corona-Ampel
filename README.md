@@ -12,5 +12,8 @@ Pandas:
 Selenium:
 <code>sudo apt-get install python3-selenium</code>
 
+Chromedriver:
+<code>sudo apt-get install chromium-chromedriver</code>
+
 RPi.GPIO
 <code>sudo apt-get install python3-rpi.gpio</code>
