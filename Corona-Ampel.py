@@ -241,7 +241,7 @@ def Ampelsteuerung(farbe):
     elif farbe == 'rot':
         LED_setColor(0,100,100)
     elif farbe == 'dunkelrot':
-        LED_setColor(0,30,30)
+        LED_setColor(0,100,50)
 
 def LED_setup():
     global pwmRed, pwmGreen, pwmBlue
@@ -464,7 +464,7 @@ def Telegrambot(msg):
             elif msg['text'] in ["/regeln", "/wasgilt"]:
                 bot.sendMessage(user_id, "Hier gibts weitere Infos: https://www.stmgp.bayern.de/coronavirus/")
 
-            elif msg['text'] in ["/help", "/?"]:
+            elif msg['text'] in ["/start", "/help", "/?"]:
                 bot.sendMessage(user_id, "Folgende Befehle sind möglich:\n/rki - um die aktuellen Zahlen des RKI abzurufen.\n/lgl - um die aktuellen Zahlen des LGL abzurufen.\n/regeln - um einen Link auf die geltenden Regeln zu erhalten.")
 
             elif msg['text'].startswith("/"):
