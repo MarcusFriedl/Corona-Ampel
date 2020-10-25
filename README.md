@@ -20,3 +20,5 @@ RPi.GPIO (für die Raspberry-Ampel):
 
 Telegram-Bot (für Telegram):
 <code>pip3 install python-telegram-bot
+  pip3 install teleport
+  pip3 install teleport --upgrade</code>
