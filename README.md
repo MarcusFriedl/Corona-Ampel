@@ -4,9 +4,6 @@ Liest den Inzidenz-Wert bestimmter Landkreise aus und gibt den Inzidenz-Wert sow
 Auf einem Raspberry Pi ist es möglich, den Inzidenz-Wert auf einem Display auszugeben. Die Ampelfarbe wird per farbiger LED angezeigt.
 
 Außerdem gibts einen Telegram-Bot!
-.. image:: https://img.shields.io/badge/Telegram-Group-blue.svg
-   :target: https://telegram.me/Corona-AmpelMiltenberg
-   :alt: Telegram Group
 
 Python 3 wird empfohlen.
 Um das Script auf dem Raspberry zu nutzen, müssen evtl. Packages nachinstalliert werden:
