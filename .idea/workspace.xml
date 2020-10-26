@@ -19,7 +19,11 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0443c41f-e34e-422f-a44f-b47c06c20102" name="Default Changelist" comment="" />
+    <list default="true" id="0443c41f-e34e-422f-a44f-b47c06c20102" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Corona-Ampel.py" beforeDir="false" afterPath="$PROJECT_DIR$/Corona-Ampel.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -50,7 +54,7 @@
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.Telegram_test">
+  <component name="RunManager" selected="Python.LED_test">
     <configuration name="Corona-Ampel" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Corona-Ampel" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -64,6 +68,27 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Corona-Ampel.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="LED_test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Corona-Ampel" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/LED_test.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -135,34 +160,13 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="json_test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="Corona-Ampel" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/json_test.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.LED_test" />
+        <item itemvalue="Python.Wert_test" />
         <item itemvalue="Python.Corona-Ampel" />
         <item itemvalue="Python.Telegram_test" />
         <item itemvalue="Python.Woche_test" />
-        <item itemvalue="Python.Wert_test" />
-        <item itemvalue="Python.json_test" />
       </list>
     </recent_temporary>
   </component>
@@ -198,21 +202,21 @@
       <screen x="0" y="23" width="1280" height="777" />
     </state>
     <state x="352" y="220" key="#com.intellij.fileTypes.FileTypeChooser/0.23.1280.777@0.23.1280.777" timestamp="1603188614735" />
-    <state width="1259" height="138" key="GridCell.Tab.0.bottom" timestamp="1603577309053">
+    <state width="1259" height="138" key="GridCell.Tab.0.bottom" timestamp="1603706655905">
       <screen x="0" y="23" width="1280" height="777" />
     </state>
-    <state width="1259" height="138" key="GridCell.Tab.0.bottom/0.23.1280.777@0.23.1280.777" timestamp="1603577309053" />
-    <state width="1259" height="138" key="GridCell.Tab.0.center" timestamp="1603577309052">
+    <state width="1259" height="138" key="GridCell.Tab.0.bottom/0.23.1280.777@0.23.1280.777" timestamp="1603706655905" />
+    <state width="1259" height="138" key="GridCell.Tab.0.center" timestamp="1603706655904">
       <screen x="0" y="23" width="1280" height="777" />
     </state>
-    <state width="1259" height="138" key="GridCell.Tab.0.center/0.23.1280.777@0.23.1280.777" timestamp="1603577309052" />
-    <state width="1259" height="138" key="GridCell.Tab.0.left" timestamp="1603577309051">
+    <state width="1259" height="138" key="GridCell.Tab.0.center/0.23.1280.777@0.23.1280.777" timestamp="1603706655904" />
+    <state width="1259" height="138" key="GridCell.Tab.0.left" timestamp="1603706655903">
       <screen x="0" y="23" width="1280" height="777" />
     </state>
-    <state width="1259" height="138" key="GridCell.Tab.0.left/0.23.1280.777@0.23.1280.777" timestamp="1603577309051" />
-    <state width="1259" height="138" key="GridCell.Tab.0.right" timestamp="1603577309053">
+    <state width="1259" height="138" key="GridCell.Tab.0.left/0.23.1280.777@0.23.1280.777" timestamp="1603706655903" />
+    <state width="1259" height="138" key="GridCell.Tab.0.right" timestamp="1603706655905">
       <screen x="0" y="23" width="1280" height="777" />
     </state>
-    <state width="1259" height="138" key="GridCell.Tab.0.right/0.23.1280.777@0.23.1280.777" timestamp="1603577309053" />
+    <state width="1259" height="138" key="GridCell.Tab.0.right/0.23.1280.777@0.23.1280.777" timestamp="1603706655905" />
   </component>
 </project>

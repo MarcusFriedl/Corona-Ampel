@@ -34,7 +34,7 @@ latchPin = 16  # ST_CP Pin of 74HC595
 clockPin = 12  # SH_CP Pin of 74HC595
 digitPin = (11, 13, 15, 19)  # Define the pin of 7-segment display common end
 num = (0xc0, 0xf9, 0xa4, 0xb0, 0x99, 0x92, 0x82, 0xf8, 0x80, 0x90)
-num2 = (0x80, 0x79, 0x24, 0x60, 0x19, 0x22, 0x02, 0x78, 0x00, 0x10)
+num2 = (0x40, 0x79, 0x24, 0x30, 0x31, 0x12, 0x02, 0x78, 0x00, 0x10)
 LSBFIRST = 1
 MSBFIRST = 2
 
@@ -241,7 +241,7 @@ def Ampelsteuerung(farbe):
     elif farbe == 'rot':
         LED_setColor(0,100,100)
     elif farbe == 'dunkelrot':
-        LED_setColor(0,100,50)
+        LED_setColor(50,100,50)
 
 def LED_setup():
     global pwmRed, pwmGreen, pwmBlue
@@ -266,7 +266,10 @@ def LED_setColor(r_val, g_val, b_val):  # change duty cycle for three pins to r_
 def Anzeige():
     #global DigitWert
     wert = DigitWert
-    dec = int(DigitWert*100)
+    if wert >= 100:
+        dec = int(DigitWert * 10)
+    else:
+        dec = int(DigitWert * 100)
 
     while True:
         Digit_display(dec, wert)
@@ -315,7 +318,7 @@ def Digit_display(dec, wert):  # display function for 7-segment display
 
     Digit_outData(0xff)
     Digit_selectDigit(0x04)  # Select the third, and display the hundreds digit
-    if wert >= 10:
+    if 10 <= wert < 100:
         Digit_outData(num2[dec % 1000 // 100])
     else:
         Digit_outData(num[dec % 1000 // 100])
@@ -496,7 +499,7 @@ if __name__ == "__main__":
             if (AktualisierungLGL == False) & (14 <= uhrzeit.tm_hour <= 16):
                 print("\nAktualisierung erfolgt alle 10 Minuten")
                 time.sleep(600)
-            elif (5 < uhrzeit.tm_hour < 14) | (16 < uhrzeit.tm_hour < 20):
+            elif (5 <= uhrzeit.tm_hour <= 14) | (16 <= uhrzeit.tm_hour <= 20):
                 print("\nAktualisierung erfolgt jede 1 Stunde")
                 time.sleep(3600)
             elif (20 <= uhrzeit.tm_hour <= 23) | (0 <= uhrzeit.tm_hour <=4):
