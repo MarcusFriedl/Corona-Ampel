@@ -4,7 +4,8 @@ import locale
 import os
 import time
 import requests
-from threading import Thread
+#from threading import Thread
+from multiprocessing import Process
 from selenium import webdriver
 import telepot
 
@@ -98,12 +99,12 @@ def main():
     # Ausgabe auf dem Telegram-Bot
     if (AktualisierungLGL == True) & (TelegramMessageLGL == False):
         chaturlLGL = CHATBOTURL + 'Der Wert des LGL ist: ' + str(LGL_wert) + '!\nSomit ist die Ampel: ' + LGL_farbe + '!\n' + standLGL
-        requests.post(chaturlLGL)
+     #   requests.post(chaturlLGL)
         TelegramMessageLGL = True
 
     if (AktualisierungRKI == True) & (TelegramMessageRKI == False):
         chaturlRKI = CHATBOTURL + 'Der Wert des RKI ist: ' + str(RKI_inzidenz) + '!\nSomit ist die Ampel: ' + RKI_farbe + '!\nStand: ' + lastUpdate
-        requests.post(chaturlRKI)
+     #   requests.post(chaturlRKI)
         TelegramMessageRKI = True
 
     # Ausgabe auf der Ampel und der Digitalanzeige
@@ -116,6 +117,14 @@ def main():
         farbe = LGL_farbe
         DigitWert = LGL_wert
         Servo = 'LGL'
+    elif (AktualisierungLGL == True) & (RKI_inzidenz <= LGL_wert):
+        farbe = LGL_farbe
+        DigitWert = LGL_wert
+        Servo = 'LGL'
+    elif (AktualisierungLGL == True) & (RKI_inzidenz > LGL_wert):
+        farbe = RKI_farbe
+        DigitWert = RKI_inzidenz
+        Servo = 'RKI'
     else:
         farbe = LGL_farbe
         DigitWert = LGL_wert
@@ -126,12 +135,15 @@ def main():
         Ampelsteuerung(farbe)
 
     if RaspberryPi_Digit == True:
-        try:
-            t.stop()
-        except:
-            pass
-        t = Thread(target=Anzeige, args=())
-        t.start()
+        for proc in procs:
+            proc.terminate()
+
+        proc = Process(target=Anzeige)
+        procs.append(proc)
+        proc.start()
+
+        for proc in procs:
+            proc.join()
 
     if RaspberryPi_Servo == True:
         if Servo == 'RKI':
@@ -241,7 +253,7 @@ def Ampelsteuerung(farbe):
     elif farbe == 'rot':
         LED_setColor(0,100,100)
     elif farbe == 'dunkelrot':
-        LED_setColor(50,100,50)
+        LED_setColor(80,100,0)
 
 def LED_setup():
     global pwmRed, pwmGreen, pwmBlue
@@ -264,7 +276,8 @@ def LED_setColor(r_val, g_val, b_val):  # change duty cycle for three pins to r_
 
 # Display
 def Anzeige():
-    #global DigitWert
+    global DigitWert
+
     wert = DigitWert
     if wert >= 100:
         dec = int(DigitWert * 10)
@@ -273,6 +286,7 @@ def Anzeige():
 
     while True:
         Digit_display(dec, wert)
+
 
 def Digit_setup():
     GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
@@ -467,6 +481,12 @@ def Telegrambot(msg):
             elif msg['text'] in ["/regeln", "/wasgilt"]:
                 bot.sendMessage(user_id, "Hier gibts weitere Infos: https://www.stmgp.bayern.de/coronavirus/")
 
+            elif msg['text'] in ["/checkStatus:Sven"]:
+                bot.sendMessage(user_id, "Oh oh, hoffentlich hast du den Scheiß nicht! Mehr Tipps zur Vorbeugung mit /washilft.")
+
+            elif msg['text'] in ["/washilft"]:
+                bot.sendMessage(user_id, "Täglich Bier und Schnaps trinken, so viel wie reingeht. Ab 12 Uhr damit anfangen, bis zum Schlafen gehn.")
+
             elif msg['text'] in ["/start", "/help", "/?"]:
                 bot.sendMessage(user_id, "Folgende Befehle sind möglich:\n/rki - um die aktuellen Zahlen des RKI abzurufen.\n/lgl - um die aktuellen Zahlen des LGL abzurufen.\n/regeln - um einen Link auf die geltenden Regeln zu erhalten.")
 
@@ -487,6 +507,7 @@ if __name__ == "__main__":
 
     # Set up Telegram Bot
     bot = telepot.Bot(API_KEY)
+    procs = []
 
     # Endlosschleife
     try:
@@ -499,7 +520,8 @@ if __name__ == "__main__":
             if (AktualisierungLGL == False) & (14 <= uhrzeit.tm_hour <= 16):
                 print("\nAktualisierung erfolgt alle 10 Minuten")
                 time.sleep(600)
-            elif (5 <= uhrzeit.tm_hour <= 14) | (16 <= uhrzeit.tm_hour <= 20):
+            #elif (5 <= uhrzeit.tm_hour <= 14) | (16 <= uhrzeit.tm_hour <= 20):
+            elif (5 <= uhrzeit.tm_hour <= 20):
                 print("\nAktualisierung erfolgt jede 1 Stunde")
                 time.sleep(3600)
             elif (20 <= uhrzeit.tm_hour <= 23) | (0 <= uhrzeit.tm_hour <=4):
