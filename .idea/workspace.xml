@@ -19,10 +19,7 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0443c41f-e34e-422f-a44f-b47c06c20102" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Corona-Ampel.py" beforeDir="false" afterPath="$PROJECT_DIR$/Corona-Ampel.py" afterDir="false" />
-    </list>
+    <list default="true" id="0443c41f-e34e-422f-a44f-b47c06c20102" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -201,21 +198,21 @@
       <screen x="0" y="23" width="1280" height="777" />
     </state>
     <state x="352" y="220" key="#com.intellij.fileTypes.FileTypeChooser/0.23.1280.777@0.23.1280.777" timestamp="1603188614735" />
-    <state width="1259" height="138" key="GridCell.Tab.0.bottom" timestamp="1603806401835">
+    <state width="1259" height="138" key="GridCell.Tab.0.bottom" timestamp="1603878937592">
       <screen x="0" y="23" width="1280" height="777" />
     </state>
-    <state width="1259" height="138" key="GridCell.Tab.0.bottom/0.23.1280.777@0.23.1280.777" timestamp="1603806401835" />
-    <state width="1259" height="138" key="GridCell.Tab.0.center" timestamp="1603806401834">
+    <state width="1259" height="138" key="GridCell.Tab.0.bottom/0.23.1280.777@0.23.1280.777" timestamp="1603878937592" />
+    <state width="1259" height="138" key="GridCell.Tab.0.center" timestamp="1603878937590">
       <screen x="0" y="23" width="1280" height="777" />
     </state>
-    <state width="1259" height="138" key="GridCell.Tab.0.center/0.23.1280.777@0.23.1280.777" timestamp="1603806401834" />
-    <state width="1259" height="138" key="GridCell.Tab.0.left" timestamp="1603806401834">
+    <state width="1259" height="138" key="GridCell.Tab.0.center/0.23.1280.777@0.23.1280.777" timestamp="1603878937590" />
+    <state width="1259" height="138" key="GridCell.Tab.0.left" timestamp="1603878937589">
       <screen x="0" y="23" width="1280" height="777" />
     </state>
-    <state width="1259" height="138" key="GridCell.Tab.0.left/0.23.1280.777@0.23.1280.777" timestamp="1603806401834" />
-    <state width="1259" height="138" key="GridCell.Tab.0.right" timestamp="1603806401835">
+    <state width="1259" height="138" key="GridCell.Tab.0.left/0.23.1280.777@0.23.1280.777" timestamp="1603878937589" />
+    <state width="1259" height="138" key="GridCell.Tab.0.right" timestamp="1603878937592">
       <screen x="0" y="23" width="1280" height="777" />
     </state>
-    <state width="1259" height="138" key="GridCell.Tab.0.right/0.23.1280.777@0.23.1280.777" timestamp="1603806401835" />
+    <state width="1259" height="138" key="GridCell.Tab.0.right/0.23.1280.777@0.23.1280.777" timestamp="1603878937592" />
   </component>
 </project>

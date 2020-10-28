@@ -4,8 +4,7 @@ import locale
 import os
 import time
 import requests
-#from threading import Thread
-from multiprocessing import Process
+import threading
 from selenium import webdriver
 import telepot
 
@@ -22,8 +21,14 @@ PATH = './csvs/'
 # Telegram Chatbot
 API_KEY = '1238405665:AAH0gx0IE9tuZJN98AC3cSdvK4E70abgz0k'
 CHATBOTURL = 'https://api.telegram.org/bot' + API_KEY + '/sendmessage?chat_id=-433144245&text='
-TelegramMessageLGL = False
-TelegramMessageRKI = False
+TelegramMessageLGL = 0.0
+TelegramMessageRKI = 0.0
+LGL_wert= ''
+standLGL= ''
+LGL_farbe= ''
+RKI_inzidenz= ''
+lastUpdate= ''
+RKI_farbe= ''
 
 # Läuft das Script auf dem RPi und ist die Ampel, die Digitalanzeige und/oder die Matrix aktiviert (True/False)?
 RaspberryPi_Ampel = True
@@ -35,9 +40,12 @@ latchPin = 16  # ST_CP Pin of 74HC595
 clockPin = 12  # SH_CP Pin of 74HC595
 digitPin = (11, 13, 15, 19)  # Define the pin of 7-segment display common end
 num = (0xc0, 0xf9, 0xa4, 0xb0, 0x99, 0x92, 0x82, 0xf8, 0x80, 0x90)
-num2 = (0x40, 0x79, 0x24, 0x30, 0x31, 0x12, 0x02, 0x78, 0x00, 0x10)
+num2 = (0x40, 0x79, 0x24, 0x30, 0x19, 0x12, 0x02, 0x78, 0x00, 0x10)
 LSBFIRST = 1
 MSBFIRST = 2
+DigitWert = 0
+t = 0
+
 
 RaspberryPi_Matrix = False
 
@@ -52,7 +60,7 @@ if RaspberryPi_Ampel == True | RaspberryPi_Digit == True | RaspberryPi_Matrix ==
     GPIO.setwarnings(False)
 
 def main():
-    global TelegramMessageLGL, TelegramMessageRKI, DigitWert, Servo, LGL_wert, standLGL, RKI_inzidenz, lastUpdate, LGL_farbe, RKI_farbe
+    global TelegramMessageLGL, TelegramMessageRKI, t, DigitWert, LGL_wert, standLGL, LGL_farbe, RKI_inzidenz, lastUpdate, RKI_farbe
 
     # Daten besorgen
     AktualisierungLGL, stand, LGL_inzidenz, LGL_wert = download_csv()
@@ -97,15 +105,19 @@ def main():
         pass
 
     # Ausgabe auf dem Telegram-Bot
-    if (AktualisierungLGL == True) & (TelegramMessageLGL == False):
+    #if (AktualisierungLGL == True) & (TelegramMessageLGL == False):
+    if (AktualisierungLGL == True) & (TelegramMessageLGL != LGL_wert):
         chaturlLGL = CHATBOTURL + 'Der Wert des LGL ist: ' + str(LGL_wert) + '!\nSomit ist die Ampel: ' + LGL_farbe + '!\n' + standLGL
-     #   requests.post(chaturlLGL)
-        TelegramMessageLGL = True
+        requests.post(chaturlLGL)
+        #TelegramMessageLGL = True
+        TelegramMessageLGL = LGL_wert
 
-    if (AktualisierungRKI == True) & (TelegramMessageRKI == False):
+    #if (AktualisierungRKI == True) & (TelegramMessageRKI == False):
+    if (AktualisierungRKI == True) & (TelegramMessageRKI != RKI_inzidenz):
         chaturlRKI = CHATBOTURL + 'Der Wert des RKI ist: ' + str(RKI_inzidenz) + '!\nSomit ist die Ampel: ' + RKI_farbe + '!\nStand: ' + lastUpdate
-     #   requests.post(chaturlRKI)
-        TelegramMessageRKI = True
+        requests.post(chaturlRKI)
+      #  TelegramMessageRKI = True
+        TelegramMessageRKI = RKI_inzidenz
 
     # Ausgabe auf der Ampel und der Digitalanzeige
     # Definition welcher Wert auf der Ampel und der Anzeige ausgegeben wird
@@ -135,15 +147,8 @@ def main():
         Ampelsteuerung(farbe)
 
     if RaspberryPi_Digit == True:
-        for proc in procs:
-            proc.terminate()
-
-        proc = Process(target=Anzeige)
-        procs.append(proc)
-        proc.start()
-
-        for proc in procs:
-            proc.join()
+        t = threading.Thread(target=Anzeige)
+        t.start()
 
     if RaspberryPi_Servo == True:
         if Servo == 'RKI':
@@ -278,15 +283,15 @@ def LED_setColor(r_val, g_val, b_val):  # change duty cycle for three pins to r_
 def Anzeige():
     global DigitWert
 
-    wert = DigitWert
-    if wert >= 100:
-        dec = int(DigitWert * 10)
-    else:
-        dec = int(DigitWert * 100)
-
     while True:
-        Digit_display(dec, wert)
+        if 1000 > DigitWert >= 100:
+            dec = int(DigitWert * 10)
+        elif DigitWert >= 1000:
+            dec = int(DigitWert)
+        elif DigitWert < 100:
+            dec = int(DigitWert * 100)
 
+        Digit_display(dec, DigitWert)
 
 def Digit_setup():
     GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
@@ -450,6 +455,8 @@ def servoWrite(angle):  # make the servo rotate to specific angle, 0-180
     p.stop()
 
 def destroy():
+    global t
+
     if RaspberryPi_Ampel == True:
         pwmRed.stop()
         pwmGreen.stop()
@@ -507,7 +514,6 @@ if __name__ == "__main__":
 
     # Set up Telegram Bot
     bot = telepot.Bot(API_KEY)
-    procs = []
 
     # Endlosschleife
     try:
@@ -519,14 +525,14 @@ if __name__ == "__main__":
 
             if (AktualisierungLGL == False) & (14 <= uhrzeit.tm_hour <= 16):
                 print("\nAktualisierung erfolgt alle 10 Minuten")
-                time.sleep(600)
+                time.sleep(550)
             #elif (5 <= uhrzeit.tm_hour <= 14) | (16 <= uhrzeit.tm_hour <= 20):
             elif (5 <= uhrzeit.tm_hour <= 20):
                 print("\nAktualisierung erfolgt jede 1 Stunde")
-                time.sleep(3600)
+                time.sleep(3550)
             elif (20 <= uhrzeit.tm_hour <= 23) | (0 <= uhrzeit.tm_hour <=4):
                 destroy()   # Ampel abschalten
-                time.sleep(3600)
+                time.sleep(3550)
             else:
                 destroy()
                 exit() # Das Script muss ausgeschaltet werden, so dass es per Cronjob erneut gestartet werden kann
