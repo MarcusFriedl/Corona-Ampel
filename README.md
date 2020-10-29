@@ -19,6 +19,7 @@ Chromedriver (für CSV-Download):
 
 RPi.GPIO (für die Raspberry-Ampel):
 <code>sudo apt-get install python3-rpi.gpio</code>
+<code>sudo apt-get install python3-pigpio</code>
 
 Telegram-Bot (für Telegram):
 <code>pip3 install python-telegram-bot
