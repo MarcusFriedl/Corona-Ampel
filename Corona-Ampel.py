@@ -133,14 +133,14 @@ def main():
     # Ausgabe auf dem Telegram-Bot
     #if (AktualisierungLGL == True) & (TelegramMessageLGL == False):
     if (AktualisierungLGL == True) & (TelegramMessageLGL != LGL_wert):
-        chaturlLGL = CHATBOTURL + 'Der Wert des LGL ist: ' + str(LGL_wert) + '!\nSomit ist die Ampel: ' + LGL_farbe + ' ' + LGL_Ampel + '!\n' + standLGL
+        chaturlLGL = CHATBOTURL + 'Der Wert des LGL ist: ' + str(LGL_wert) + '!\nSomit ist die Ampel: ' + LGL_farbe + ' ' + LGL_Ampel + '\n' + standLGL
         requests.post(chaturlLGL)
         #TelegramMessageLGL = True
         TelegramMessageLGL = LGL_wert
 
     #if (AktualisierungRKI == True) & (TelegramMessageRKI == False):
     if (AktualisierungRKI == True) & (TelegramMessageRKI != RKI_inzidenz):
-        chaturlRKI = CHATBOTURL + 'Der Wert des RKI ist: ' + str(RKI_inzidenz) + '!\nSomit ist die Ampel: ' + RKI_farbe + ' ' + RKI_Ampel + '!\nStand: ' + lastUpdate
+        chaturlRKI = CHATBOTURL + 'Der Wert des RKI ist: ' + str(RKI_inzidenz) + '!\nSomit ist die Ampel: ' + RKI_farbe + ' ' + RKI_Ampel + '\nStand: ' + lastUpdate
         requests.post(chaturlRKI)
       #  TelegramMessageRKI = True
         TelegramMessageRKI = RKI_inzidenz
@@ -468,6 +468,8 @@ def destroy():
 
 # Telegram-Bot
 def Telegrambot(msg):
+    global digits
+
     if (RKI_farbe == 'dunkelrot') | (RKI_farbe == 'rot'):
         RKI_Ampel = "\U0001F534"
     elif RKI_farbe == 'gelb':
@@ -482,11 +484,11 @@ def Telegrambot(msg):
     elif LGL_farbe == 'grün':
         LGL_Ampel = "\U0001F7E2"
 
-    if digits[len(digits) - 1] > digits[len(digits) - 2]:
+    if 1 - digits[len(digits) - 1] > 1 - digits[len(digits) - 2]:
         trend = "steigend \U00002197"
-    elif digits[len(digits) - 1] == digits[len(digits) - 2]:
+    elif 1 - digits[len(digits) - 1] == 1 - digits[len(digits) - 2]:
         trend = "gleichbleibend \U000027A1"
-    elif digits[len(digits) - 1] < digits[len(digits) - 2]:
+    elif 1 - digits[len(digits) - 1] < 1 - digits[len(digits) - 2]:
         trend = "fallend \U00002198"
 
     #print("\U00002B06")
@@ -501,16 +503,16 @@ def Telegrambot(msg):
         if content_type == 'text':
             user_id = msg['chat']['id']
             if msg['text'] in ["/rki", "/RKI", "/Rki"]:
-                bot.sendMessage(user_id, "Der Wert vom RKI ist " + str(RKI_inzidenz) + ".\nDie Ampelfarbe ist " + RKI_farbe + " " + RKI_Ampel + ".\nStand: " + lastUpdate)
+                bot.sendMessage(user_id, "Der Wert vom RKI ist " + str(RKI_inzidenz) + ".\nDie Ampelfarbe ist " + RKI_farbe + " " + RKI_Ampel + "\nStand: " + lastUpdate)
 
             elif msg['text'] in ["/lgl", "/LGL", "/Lgl", "Bayern"]:
-                bot.sendMessage(user_id, "Der Wert vom LGL ist " + str(LGL_wert) + ".\nDie Ampelfarbe ist " + LGL_farbe + " " + LGL_Ampel + ".\n" + standLGL)
+                bot.sendMessage(user_id, "Der Wert vom LGL ist " + str(LGL_wert) + ".\nDie Ampelfarbe ist " + LGL_farbe + " " + LGL_Ampel + "\nDer Trend auf Basis dieser Zahlen ist " + trend + "\n" + standLGL)
 
             elif msg['text'] in ["/regeln", "/wasgilt"]:
                 bot.sendMessage(user_id, "Hier gibts weitere Infos: https://www.stmgp.bayern.de/coronavirus/")
 
             elif msg['text'] in ["/trend", "/Trend"]:
-                bot.sendMessage(user_id, "Der Trend auf Basis der Zahlen des LGL ist " + trend + "!")
+                bot.sendMessage(user_id, "Der Trend auf Basis der Zahlen des LGL ist " + trend)
 
             elif msg['text'] in ["/start", "/help", "/?"]:
                 bot.sendMessage(user_id, "Folgende Befehle sind möglich:\n/rki - um die aktuellen Zahlen des RKI abzurufen.\n/lgl - um die aktuellen Zahlen des LGL abzurufen.\n/trend - um den aktuellen Trend auf Basis der LGL-Zahlen abzurufen.\n/regeln - um einen Link auf die geltenden Regeln zu erhalten.")
