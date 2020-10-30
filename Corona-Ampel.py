@@ -16,7 +16,7 @@ locale.setlocale(locale.LC_ALL, 'de_DE.UTF-8')
 LOCATION = 'Miltenberg'
 
 # Dateipfad, wo die CSVs vom LGL abgelegt werden sollen
-PATH = './csvs/'
+PATH = '/ftp/Corona-Ampel/csvs/'
 
 # Telegram Chatbot
 API_KEY = '1238405665:AAH0gx0IE9tuZJN98AC3cSdvK4E70abgz0k'
@@ -47,7 +47,19 @@ DigitWert = 0
 t = 0
 
 
-RaspberryPi_Matrix = False
+RaspberryPi_Matrix = True
+Matrix_LSBFIRST = 1
+Matrix_MSBFIRST = 2
+# define the pins connect to 74HC595
+Matrix_dataPin   = 36      # DS Pin of 74HC595(Pin14)
+Matrix_latchPin  = 38      # ST_CP Pin of 74HC595(Pin12)
+Matrix_clockPin = 40       # SH_CP Pin of 74HC595(Pin11)
+#data = [0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80]
+data = [0x00, 0xFE, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80, 0x00]
+xdata = [0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01]
+m = 0
+digits = []
+
 
 RaspberryPi_Servo = True
 OFFSE_DUTY = 0.5        #define pulse offset of servo
@@ -104,17 +116,31 @@ def main():
     except:
         pass
 
+    if (RKI_farbe == 'dunkelrot') | (RKI_farbe == 'rot'):
+        RKI_Ampel = "\U0001F534"
+    elif RKI_farbe == 'gelb':
+        RKI_Ampel = "\U0001F7E1"
+    elif RKI_farbe == 'grün':
+        RKI_Ampel = "\U0001F7E2"
+
+    if (LGL_farbe == 'dunkelrot') | (LGL_farbe == 'rot'):
+        LGL_Ampel = "\U0001F534"
+    elif LGL_farbe == 'gelb':
+        LGL_Ampel = "\U0001F7E1"
+    elif LGL_farbe == 'grün':
+        LGL_Ampel = "\U0001F7E2"
+
     # Ausgabe auf dem Telegram-Bot
     #if (AktualisierungLGL == True) & (TelegramMessageLGL == False):
     if (AktualisierungLGL == True) & (TelegramMessageLGL != LGL_wert):
-        chaturlLGL = CHATBOTURL + 'Der Wert des LGL ist: ' + str(LGL_wert) + '!\nSomit ist die Ampel: ' + LGL_farbe + '!\n' + standLGL
+        chaturlLGL = CHATBOTURL + 'Der Wert des LGL ist: ' + str(LGL_wert) + '!\nSomit ist die Ampel: ' + LGL_farbe + ' ' + LGL_Ampel + '!\n' + standLGL
         requests.post(chaturlLGL)
         #TelegramMessageLGL = True
         TelegramMessageLGL = LGL_wert
 
     #if (AktualisierungRKI == True) & (TelegramMessageRKI == False):
     if (AktualisierungRKI == True) & (TelegramMessageRKI != RKI_inzidenz):
-        chaturlRKI = CHATBOTURL + 'Der Wert des RKI ist: ' + str(RKI_inzidenz) + '!\nSomit ist die Ampel: ' + RKI_farbe + '!\nStand: ' + lastUpdate
+        chaturlRKI = CHATBOTURL + 'Der Wert des RKI ist: ' + str(RKI_inzidenz) + '!\nSomit ist die Ampel: ' + RKI_farbe + ' ' + RKI_Ampel + '!\nStand: ' + lastUpdate
         requests.post(chaturlRKI)
       #  TelegramMessageRKI = True
         TelegramMessageRKI = RKI_inzidenz
@@ -146,9 +172,9 @@ def main():
     if RaspberryPi_Ampel == True:
         Ampelsteuerung(farbe)
 
-    if RaspberryPi_Digit == True:
-        t = threading.Thread(target=Anzeige)
-        t.start()
+    #if RaspberryPi_Digit == True:   läuft schon, es muss nur der DigitWert geändert werden
+    if RaspberryPi_Matrix == True:
+        Matrix_checkfiles()
 
     if RaspberryPi_Servo == True:
         if Servo == 'RKI':
@@ -350,8 +376,15 @@ def Digit_display(dec, wert):  # display function for 7-segment display
 
 # Matrix
 def Matrix():
+    while True:
+        Matrix_loop(digits)
+
+def Matrix_checkfiles():
+    global digits
+
     # Die letzten 8 Dateien bestimmen
     files = os.listdir(PATH)
+    files.sort()
     wertehistorie = []
     digits = []
 
@@ -361,79 +394,39 @@ def Matrix():
     else:
         l = 8
 
-    for i in range (-l, 0):
+    for i in range(-l, 0):
         stand, inzidenz = load_csv(files[i])
         wert = extract_inzidenz(inzidenz)
         wertehistorie.append(wert)
 
     for d in wertehistorie:
-        hoehe = round(d / max(wertehistorie) / 0.125)  # Die Matrix hat 8 mögliche LEDs, daher ist der Max-Wert ganz oben
-        digits.append(hoehe)
-
-    print(digits)
+        hoehe = round(
+            d / max(wertehistorie) / 0.125)  # Die Matrix hat 8 mögliche LEDs, daher ist der Max-Wert ganz oben
+        digits.append(data[hoehe])
 
 def Matrix_setup():
-    # define the pins connect to 74HC595
-    dataPin = 11  # DS Pin of 74HC595(Pin14)
-    latchPin = 13  # ST_CP Pin of 74HC595(Pin12)
-    clockPin = 15  # SH_CP Pin of 74HC595(Pin11)
-    pic = [0x1c, 0x22, 0x51, 0x45, 0x45, 0x51, 0x22, 0x1c]  # data of smiling face
-    data = [  # data of "0-F"
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  # " "
-        0x00, 0x00, 0x3E, 0x41, 0x41, 0x3E, 0x00, 0x00,  # "0"
-        0x00, 0x00, 0x21, 0x7F, 0x01, 0x00, 0x00, 0x00,  # "1"
-        0x00, 0x00, 0x23, 0x45, 0x49, 0x31, 0x00, 0x00,  # "2"
-        0x00, 0x00, 0x22, 0x49, 0x49, 0x36, 0x00, 0x00,  # "3"
-        0x00, 0x00, 0x0E, 0x32, 0x7F, 0x02, 0x00, 0x00,  # "4"
-        0x00, 0x00, 0x79, 0x49, 0x49, 0x46, 0x00, 0x00,  # "5"
-        0x00, 0x00, 0x3E, 0x49, 0x49, 0x26, 0x00, 0x00,  # "6"
-        0x00, 0x00, 0x60, 0x47, 0x48, 0x70, 0x00, 0x00,  # "7"
-        0x00, 0x00, 0x36, 0x49, 0x49, 0x36, 0x00, 0x00,  # "8"
-        0x00, 0x00, 0x32, 0x49, 0x49, 0x3E, 0x00, 0x00,  # "9"
-    ]
-
     GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
-    GPIO.setup(dataPin, GPIO.OUT)
-    GPIO.setup(latchPin, GPIO.OUT)
-    GPIO.setup(clockPin, GPIO.OUT)
+    GPIO.setup(Matrix_dataPin, GPIO.OUT)
+    GPIO.setup(Matrix_latchPin, GPIO.OUT)
+    GPIO.setup(Matrix_clockPin, GPIO.OUT)
 
 def Matrix_shiftOut(dPin, cPin, order, val):
-    LSBFIRST = 1
-    MSBFIRST = 2
-
     for i in range(0, 8):
         GPIO.output(cPin, GPIO.LOW);
-        if (order == LSBFIRST):
+        if (order == Matrix_LSBFIRST):
             GPIO.output(dPin, (0x01 & (val >> i) == 0x01) and GPIO.HIGH or GPIO.LOW)
-        elif (order == MSBFIRST):
+        elif (order == Matrix_MSBFIRST):
             GPIO.output(dPin, (0x80 & (val << i) == 0x80) and GPIO.HIGH or GPIO.LOW)
         GPIO.output(cPin, GPIO.HIGH);
 
-def Matrix_loop():
-    while True:
-        for j in range(0, 500):  # Repeat enough times to display the smiling face a period of time
-            x = 0x80
-            for i in range(0, 8):
-                GPIO.output(latchPin, GPIO.LOW)
-                shiftOut(dataPin, clockPin, MSBFIRST,
-                         pic[i])  # first shift data of line information to first stage 74HC959
-
-                shiftOut(dataPin, clockPin, MSBFIRST,
-                         ~x)  # then shift data of column information to second stage 74HC959
-                GPIO.output(latchPin, GPIO.HIGH)  # Output data of two stage 74HC595 at the same time
-                time.sleep(0.001)  # display the next column
-                x >>= 1
-        for k in range(0, len(data) - 8):  # len(data) total number of "0-F" columns
-            for j in range(0,
-                           20):  # times of repeated displaying LEDMatrix in every frame, the bigger the "j", the longer the display time.
-                x = 0x80  # Set the column information to start from the first column
-                for i in range(k, k + 8):
-                    GPIO.output(latchPin, GPIO.LOW)
-                    shiftOut(dataPin, clockPin, MSBFIRST, data[i])
-                    shiftOut(dataPin, clockPin, MSBFIRST, ~x)
-                    GPIO.output(latchPin, GPIO.HIGH)
-                    time.sleep(0.001)
-                    x >>= 1
+def Matrix_loop(digits):
+    for y in range(0, len(digits)):
+        x = xdata[y]
+        GPIO.output(Matrix_latchPin, GPIO.LOW)
+        Matrix_shiftOut(Matrix_dataPin, Matrix_clockPin, Matrix_MSBFIRST, ~digits[y]) # Welche Reihe ist an? Das ~ dreht den Binärwert um
+        Matrix_shiftOut(Matrix_dataPin, Matrix_clockPin, Matrix_MSBFIRST, ~x) # Welche Spalte ist an?
+        GPIO.output(Matrix_latchPin, GPIO.HIGH)
+        time.sleep(0.002)
 
 # Servo steuern
 def Servo_map(value, fromLow, fromHigh, toLow, toHigh):  # map a value from one range to another range
@@ -451,11 +444,11 @@ def Servo_setup():
 
 def servoWrite(angle):  # make the servo rotate to specific angle, 0-180
     p.ChangeDutyCycle(Servo_map(angle, 0, 180, SERVO_MIN_DUTY, SERVO_MAX_DUTY))  # map the angle to duty cycle and output it
-    time.sleep(0.5)
-    p.stop()
+    time.sleep(1)
+    p.ChangeDutyCycle(0)
 
 def destroy():
-    global t
+    global t, p
 
     if RaspberryPi_Ampel == True:
         pwmRed.stop()
@@ -475,31 +468,56 @@ def destroy():
 
 # Telegram-Bot
 def Telegrambot(msg):
+    if (RKI_farbe == 'dunkelrot') | (RKI_farbe == 'rot'):
+        RKI_Ampel = "\U0001F534"
+    elif RKI_farbe == 'gelb':
+        RKI_Ampel = "\U0001F7E1"
+    elif RKI_farbe == 'grün':
+        RKI_Ampel = "\U0001F7E2"
+
+    if (LGL_farbe == 'dunkelrot') | (LGL_farbe == 'rot'):
+        LGL_Ampel = "\U0001F534"
+    elif LGL_farbe == 'gelb':
+        LGL_Ampel = "\U0001F7E1"
+    elif LGL_farbe == 'grün':
+        LGL_Ampel = "\U0001F7E2"
+
+    if digits[len(digits) - 1] > digits[len(digits) - 2]:
+        trend = "steigend \U00002197"
+    elif digits[len(digits) - 1] == digits[len(digits) - 2]:
+        trend = "gleichbleibend \U000027A1"
+    elif digits[len(digits) - 1] < digits[len(digits) - 2]:
+        trend = "fallend \U00002198"
+
+    #print("\U00002B06")
+    #print("\U00002B07")
+    #print("\U000027A1")
+    #print("\U00002197")
+    #print("\U00002198")
+
+
     try:
         content_type, chat_type, chat_id = telepot.glance(msg)
         if content_type == 'text':
             user_id = msg['chat']['id']
             if msg['text'] in ["/rki", "/RKI", "/Rki"]:
-                bot.sendMessage(user_id, "Der Wert vom RKI ist " + str(RKI_inzidenz) + ".\nDie Ampelfarbe ist " + RKI_farbe + ".\nStand: " + lastUpdate)
+                bot.sendMessage(user_id, "Der Wert vom RKI ist " + str(RKI_inzidenz) + ".\nDie Ampelfarbe ist " + RKI_farbe + " " + RKI_Ampel + ".\nStand: " + lastUpdate)
 
             elif msg['text'] in ["/lgl", "/LGL", "/Lgl", "Bayern"]:
-                bot.sendMessage(user_id, "Der Wert vom LGL ist " + str(LGL_wert) + ".\nDie Ampelfarbe ist " + LGL_farbe + ".\n" + standLGL)
+                bot.sendMessage(user_id, "Der Wert vom LGL ist " + str(LGL_wert) + ".\nDie Ampelfarbe ist " + LGL_farbe + " " + LGL_Ampel + ".\n" + standLGL)
 
             elif msg['text'] in ["/regeln", "/wasgilt"]:
                 bot.sendMessage(user_id, "Hier gibts weitere Infos: https://www.stmgp.bayern.de/coronavirus/")
 
-            elif msg['text'] in ["/checkStatus:Sven"]:
-                bot.sendMessage(user_id, "Oh oh, hoffentlich hast du den Scheiß nicht! Mehr Tipps zur Vorbeugung mit /washilft.")
-
-            elif msg['text'] in ["/washilft"]:
-                bot.sendMessage(user_id, "Täglich Bier und Schnaps trinken, so viel wie reingeht. Ab 12 Uhr damit anfangen, bis zum Schlafen gehn.")
+            elif msg['text'] in ["/trend", "/Trend"]:
+                bot.sendMessage(user_id, "Der Trend auf Basis der Zahlen des LGL ist " + trend + "!")
 
             elif msg['text'] in ["/start", "/help", "/?"]:
-                bot.sendMessage(user_id, "Folgende Befehle sind möglich:\n/rki - um die aktuellen Zahlen des RKI abzurufen.\n/lgl - um die aktuellen Zahlen des LGL abzurufen.\n/regeln - um einen Link auf die geltenden Regeln zu erhalten.")
+                bot.sendMessage(user_id, "Folgende Befehle sind möglich:\n/rki - um die aktuellen Zahlen des RKI abzurufen.\n/lgl - um die aktuellen Zahlen des LGL abzurufen.\n/trend - um den aktuellen Trend auf Basis der LGL-Zahlen abzurufen.\n/regeln - um einen Link auf die geltenden Regeln zu erhalten.")
 
             elif msg['text'].startswith("/"):
                 bot.sendMessage(user_id, "Mit dem Befehl `" + msg['text'] + "` kann ich leider nichts anfangen.")
-                bot.sendMessage(user_id, "Ich verstehe nur /rki und /lgl.")
+                bot.sendMessage(user_id, "Ich verstehe nur /rki, /lgl und /trend.")
     except telepot.exception.BotWasBlockedError:
         pass
 
@@ -509,8 +527,14 @@ if __name__ == "__main__":
         LED_setup()
     if RaspberryPi_Digit == True:
         Digit_setup()
+        t = threading.Thread(target=Anzeige)
+        t.start()
     if RaspberryPi_Servo == True:
         Servo_setup()
+    if RaspberryPi_Matrix == True:
+        Matrix_setup()
+        m = threading.Thread(target=Matrix)
+        m.start()
 
     # Set up Telegram Bot
     bot = telepot.Bot(API_KEY)

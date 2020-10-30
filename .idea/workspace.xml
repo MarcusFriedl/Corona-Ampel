@@ -50,7 +50,7 @@
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.Corona-Ampel">
+  <component name="RunManager" selected="Python.emoji_test">
     <configuration name="Corona-Ampel" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Corona-Ampel" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -93,7 +93,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="Telegram_test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="Matrix_test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Corona-Ampel" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -105,7 +105,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Telegram_test.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Matrix_test.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -135,7 +135,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="Woche_test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="emoji_test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Corona-Ampel" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -147,7 +147,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Woche_test.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/emoji_test.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -158,11 +158,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.emoji_test" />
+        <item itemvalue="Python.Matrix_test" />
         <item itemvalue="Python.Corona-Ampel" />
         <item itemvalue="Python.LED_test" />
         <item itemvalue="Python.Wert_test" />
-        <item itemvalue="Python.Telegram_test" />
-        <item itemvalue="Python.Woche_test" />
       </list>
     </recent_temporary>
   </component>
@@ -198,21 +198,21 @@
       <screen x="0" y="23" width="1280" height="777" />
     </state>
     <state x="352" y="220" key="#com.intellij.fileTypes.FileTypeChooser/0.23.1280.777@0.23.1280.777" timestamp="1603188614735" />
-    <state width="1259" height="138" key="GridCell.Tab.0.bottom" timestamp="1603878937592">
+    <state width="1259" height="138" key="GridCell.Tab.0.bottom" timestamp="1604052484716">
       <screen x="0" y="23" width="1280" height="777" />
     </state>
-    <state width="1259" height="138" key="GridCell.Tab.0.bottom/0.23.1280.777@0.23.1280.777" timestamp="1603878937592" />
-    <state width="1259" height="138" key="GridCell.Tab.0.center" timestamp="1603878937590">
+    <state width="1259" height="138" key="GridCell.Tab.0.bottom/0.23.1280.777@0.23.1280.777" timestamp="1604052484716" />
+    <state width="1259" height="138" key="GridCell.Tab.0.center" timestamp="1604052484715">
       <screen x="0" y="23" width="1280" height="777" />
     </state>
-    <state width="1259" height="138" key="GridCell.Tab.0.center/0.23.1280.777@0.23.1280.777" timestamp="1603878937590" />
-    <state width="1259" height="138" key="GridCell.Tab.0.left" timestamp="1603878937589">
+    <state width="1259" height="138" key="GridCell.Tab.0.center/0.23.1280.777@0.23.1280.777" timestamp="1604052484715" />
+    <state width="1259" height="138" key="GridCell.Tab.0.left" timestamp="1604052484715">
       <screen x="0" y="23" width="1280" height="777" />
     </state>
-    <state width="1259" height="138" key="GridCell.Tab.0.left/0.23.1280.777@0.23.1280.777" timestamp="1603878937589" />
-    <state width="1259" height="138" key="GridCell.Tab.0.right" timestamp="1603878937592">
+    <state width="1259" height="138" key="GridCell.Tab.0.left/0.23.1280.777@0.23.1280.777" timestamp="1604052484715" />
+    <state width="1259" height="138" key="GridCell.Tab.0.right" timestamp="1604052484716">
       <screen x="0" y="23" width="1280" height="777" />
     </state>
-    <state width="1259" height="138" key="GridCell.Tab.0.right/0.23.1280.777@0.23.1280.777" timestamp="1603878937592" />
+    <state width="1259" height="138" key="GridCell.Tab.0.right/0.23.1280.777@0.23.1280.777" timestamp="1604052484716" />
   </component>
 </project>
