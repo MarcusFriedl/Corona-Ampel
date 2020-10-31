@@ -59,6 +59,7 @@ data = [0x00, 0xFE, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80, 0x00]
 xdata = [0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01]
 m = 0
 digits = []
+wertehistorie = []
 
 
 RaspberryPi_Servo = True
@@ -72,7 +73,7 @@ if RaspberryPi_Ampel == True | RaspberryPi_Digit == True | RaspberryPi_Matrix ==
     GPIO.setwarnings(False)
 
 def main():
-    global TelegramMessageLGL, TelegramMessageRKI, t, DigitWert, LGL_wert, standLGL, LGL_farbe, RKI_inzidenz, lastUpdate, RKI_farbe
+    global TelegramMessageLGL, TelegramMessageRKI, t, DigitWert, LGL_wert, standLGL, LGL_farbe, RKI_inzidenz, lastUpdate, RKI_farbe, wertehistorie
 
     # Daten besorgen
     AktualisierungLGL, stand, LGL_inzidenz, LGL_wert = download_csv()
@@ -181,9 +182,6 @@ def main():
             servoWrite(0)
         elif Servo == 'LGL':
             servoWrite(180)
-
-    if RaspberryPi_Matrix == True:
-        Matrix()
 
     # Bescheid geben, ob eine Aktualisierung des LGL erfolgt ist, oder nicht.
     # Bis die Aktualisierung erfolgt ist, wird alle 10 Minuten gecheckt. Danach nur noch alle 2 Stunden.
@@ -380,7 +378,7 @@ def Matrix():
         Matrix_loop(digits)
 
 def Matrix_checkfiles():
-    global digits
+    global digits, wertehistorie
 
     # Die letzten 8 Dateien bestimmen
     files = os.listdir(PATH)
@@ -468,7 +466,7 @@ def destroy():
 
 # Telegram-Bot
 def Telegrambot(msg):
-    global digits
+    global digits, wertehistorie
 
     if (RKI_farbe == 'dunkelrot') | (RKI_farbe == 'rot'):
         RKI_Ampel = "\U0001F534"
@@ -484,12 +482,12 @@ def Telegrambot(msg):
     elif LGL_farbe == 'grün':
         LGL_Ampel = "\U0001F7E2"
 
-    if 1 - digits[len(digits) - 1] > 1 - digits[len(digits) - 2]:
+    if wertehistorie[len(wertehistorie) - 1] > wertehistorie[len(wertehistorie) - 2]:
         trend = "steigend \U00002197"
-    elif 1 - digits[len(digits) - 1] == 1 - digits[len(digits) - 2]:
-        trend = "gleichbleibend \U000027A1"
-    elif 1 - digits[len(digits) - 1] < 1 - digits[len(digits) - 2]:
+        trend2 = str(round(wertehistorie[len(wertehistorie) - 1] - wertehistorie[len(wertehistorie) - 2], 2)) + " gestiegen \U00002197"
+    elif wertehistorie[len(wertehistorie) - 1] <= wertehistorie[len(wertehistorie) - 2]:
         trend = "fallend \U00002198"
+        trend2 = str(round(wertehistorie[len(wertehistorie) - 2] - wertehistorie[len(wertehistorie) - 1], 2)) + " gefallen \U00002198"
 
     #print("\U00002B06")
     #print("\U00002B07")
@@ -506,13 +504,13 @@ def Telegrambot(msg):
                 bot.sendMessage(user_id, "Der Wert vom RKI ist " + str(RKI_inzidenz) + ".\nDie Ampelfarbe ist " + RKI_farbe + " " + RKI_Ampel + "\nStand: " + lastUpdate)
 
             elif msg['text'] in ["/lgl", "/LGL", "/Lgl", "Bayern"]:
-                bot.sendMessage(user_id, "Der Wert vom LGL ist " + str(LGL_wert) + ".\nDie Ampelfarbe ist " + LGL_farbe + " " + LGL_Ampel + "\nDer Trend auf Basis dieser Zahlen ist " + trend + "\n" + standLGL)
+                bot.sendMessage(user_id, "Der Wert vom LGL ist " + str(LGL_wert) + ".\nDie Ampelfarbe ist " + LGL_farbe + " " + LGL_Ampel + "\nDer Wert ist um " + trend2 + "\n" + standLGL)
 
             elif msg['text'] in ["/regeln", "/wasgilt"]:
                 bot.sendMessage(user_id, "Hier gibts weitere Infos: https://www.stmgp.bayern.de/coronavirus/")
 
             elif msg['text'] in ["/trend", "/Trend"]:
-                bot.sendMessage(user_id, "Der Trend auf Basis der Zahlen des LGL ist " + trend)
+                bot.sendMessage(user_id, "Der Wert auf Basis der Zahlen des LGL ist um " + trend2)
 
             elif msg['text'] in ["/start", "/help", "/?"]:
                 bot.sendMessage(user_id, "Folgende Befehle sind möglich:\n/rki - um die aktuellen Zahlen des RKI abzurufen.\n/lgl - um die aktuellen Zahlen des LGL abzurufen.\n/trend - um den aktuellen Trend auf Basis der LGL-Zahlen abzurufen.\n/regeln - um einen Link auf die geltenden Regeln zu erhalten.")
@@ -550,12 +548,12 @@ if __name__ == "__main__":
             uhrzeit = time.localtime()
 
             if (AktualisierungLGL == False) & (14 <= uhrzeit.tm_hour <= 16):
-                print("\nAktualisierung erfolgt alle 10 Minuten")
-                time.sleep(550)
+                print("\nAktualisierung erfolgt alle 5 Minuten")
+                time.sleep(300)
             #elif (5 <= uhrzeit.tm_hour <= 14) | (16 <= uhrzeit.tm_hour <= 20):
             elif (5 <= uhrzeit.tm_hour <= 20):
-                print("\nAktualisierung erfolgt jede 1 Stunde")
-                time.sleep(3550)
+                print("\nAktualisierung erfolgt alle 15 Minuten")
+                time.sleep(900)
             elif (20 <= uhrzeit.tm_hour <= 23) | (0 <= uhrzeit.tm_hour <=4):
                 destroy()   # Ampel abschalten
                 time.sleep(3550)
