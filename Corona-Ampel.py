@@ -287,7 +287,7 @@ def Ampelsteuerung(farbe):
 def LED_setup():
     global pwmRed, pwmGreen, pwmBlue
 
-    GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
+    #GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
     GPIO.setup(LED_pins, GPIO.OUT)  # set RGBLED pins to OUTPUT mode
     GPIO.output(LED_pins, GPIO.HIGH)  # make RGBLED pins output HIGH level
 
@@ -318,7 +318,7 @@ def Anzeige():
         Digit_display(dec, DigitWert)
 
 def Digit_setup():
-    GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
+    #GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
     GPIO.setup(dataPin, GPIO.OUT)  # Set pin mode to OUTPUT
     GPIO.setup(latchPin, GPIO.OUT)
     GPIO.setup(clockPin, GPIO.OUT)
@@ -403,7 +403,7 @@ def Matrix_checkfiles():
         digits.append(data[hoehe])
 
 def Matrix_setup():
-    GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
+    #GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
     GPIO.setup(Matrix_dataPin, GPIO.OUT)
     GPIO.setup(Matrix_latchPin, GPIO.OUT)
     GPIO.setup(Matrix_clockPin, GPIO.OUT)
@@ -433,7 +433,7 @@ def Servo_map(value, fromLow, fromHigh, toLow, toHigh):  # map a value from one 
 def Servo_setup():
     global p
 
-    GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
+    #GPIO.setmode(GPIO.BOARD)  # use PHYSICAL GPIO Numbering
     GPIO.setup(servoPin, GPIO.OUT)  # Set servoPin to OUTPUT mode
     GPIO.output(servoPin, GPIO.LOW)  # Make servoPin output LOW level
 
@@ -523,6 +523,8 @@ def Telegrambot(msg):
 
 # starten, wenn kein Aufruf aus einem anderen Modul kommt, wo das Script importiert ist
 if __name__ == "__main__":
+    GPIO.setmode(GPIO.BOARD)
+
     if RaspberryPi_Ampel == True:
         LED_setup()
     if RaspberryPi_Digit == True:
