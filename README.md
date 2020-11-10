@@ -1,6 +1,7 @@
 # Corona-Ampel
 ## Was macht die Ampel?
 Liest den Inzidenz-Wert bestimmter Landkreise von der API des RKI  und des LGL aus und gibt den Inzidenz-Wert sowie die Ampelfarbe aus.
+Das LGL listet die Werte für Bayern auf. Für andere Bundesländer müsste der Code entsprechend angepasst werden. Einzelne Parts können natürlich auch aus dem Code entfernt werden.
 
 Auf einem Raspberry Pi ist es möglich, den Inzidenz-Wert auf einem Display auszugeben. Die Ampelfarbe wird per farbiger LED angezeigt.
 
