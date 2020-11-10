@@ -13,13 +13,13 @@ import telepot
 locale.setlocale(locale.LC_ALL, 'de_DE.UTF-8')
 
 # Hier die entsprechende Stadt bzw. den Landkreis erfassen gem. den Eintragungen in der Liste
-LOCATION = 'Miltenberg'
+LOCATION = 'YOUR_LOCATION'
 
 # Dateipfad, wo die CSVs vom LGL abgelegt werden sollen
 PATH = '/ftp/Corona-Ampel/csvs/'
 
 # Telegram Chatbot
-API_KEY = '1238405665:AAH0gx0IE9tuZJN98AC3cSdvK4E70abgz0k'
+API_KEY = 'YOUR_API'
 CHATBOTURL = 'https://api.telegram.org/bot' + API_KEY + '/sendmessage?chat_id=-433144245&text='
 TelegramMessageLGL = 0.0
 TelegramMessageRKI = 0.0
