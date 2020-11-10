@@ -1,4 +1,5 @@
 # Corona-Ampel
+## Was macht die Ampel?
 Liest den Inzidenz-Wert bestimmter Landkreise von der API des RKI  und des LGL aus und gibt den Inzidenz-Wert sowie die Ampelfarbe aus.
 
 Auf einem Raspberry Pi ist es möglich, den Inzidenz-Wert auf einem Display auszugeben. Die Ampelfarbe wird per farbiger LED angezeigt.
@@ -16,6 +17,8 @@ Im oben erwähnten Baukasten sind die entsprechenden Anleitungen und Verdrahtung
 
 
 Außerdem gibts einen Telegram-Bot!
+
+## Raspberry-Applikation
 
 **Python 3 wird empfohlen.**
 Um das Script auf dem Raspberry zu nutzen, müssen evtl. Packages nachinstalliert werden:
@@ -42,6 +45,8 @@ Um das Script auf dem Raspberry zu nutzen, müssen evtl. Packages nachinstallier
 **Folgende Variablen müssen noch angepasst werden:**
 <code>LOCATION - Hier den Landkreis/Ort eintragen, für den die Inzidenzwerte geladen werden sollen.</code>
 <code>API-KEY - Hier euren API-Key für den Telegram-Bot eintragen.</code>
+
+## Sonstiges
 
 Der Code ist sicherlich nicht zu 100% professionell und kann durchaus verbessert werden. Dennoch erfüllt er seinen Zweck.
 Sofern mich jemand unterstützen möchte, gerne per BTC an: 
