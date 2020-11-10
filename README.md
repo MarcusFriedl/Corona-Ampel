@@ -50,5 +50,13 @@ Um das Script auf dem Raspberry zu nutzen, müssen evtl. Packages nachinstallier
 ## Sonstiges
 
 Der Code ist sicherlich nicht zu 100% professionell und kann durchaus verbessert werden. Dennoch erfüllt er seinen Zweck.
-Sofern mich jemand unterstützen möchte, gerne per BTC an: 
-Oder damit auch unsere Gastronomie nach dem Lockdown etwas davon hat, spendiert mir ein Bier:
+Sofern mich jemand unterstützen möchte, gerne per BTC an <code>3NAbijqnAxAT5mCSXzxNLzUoLXyjTtcR7P</code> oder per ETH an <code>0x570790cD48676fb49387b1BB160d38181Eeb380c</code>
+Oder damit auch unsere Gastronomie nach dem Lockdown etwas davon hat, spendiert mir ein Bier :beer:: http://paypal.me/marcusfriedl
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+<input type="hidden" name="cmd" value="_s-xclick">
+<input type="hidden" name="hosted_button_id" value="H7T8K5JJ49M46">
+<input type="image" src="https://www.paypalobjects.com/de_DE/DE/i/btn/btn_paynow_LG.gif" border="0" name="submit" alt="Jetzt einfach, schnell und sicher online bezahlen – mit PayPal.">
+<img alt="" border="0" src="https://www.paypalobjects.com/de_DE/i/scr/pixel.gif" width="1" height="1">
+</form>
+
+
