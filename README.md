@@ -3,7 +3,7 @@
 Liest den Inzidenz-Wert bestimmter Landkreise von der API des RKI  und des LGL aus und gibt den Inzidenz-Wert sowie die Ampelfarbe aus.
 Das LGL listet die Werte für Bayern auf. Für andere Bundesländer müsste der Code entsprechend angepasst werden. Einzelne Parts können natürlich auch aus dem Code entfernt werden.
 
-Auf einem Raspberry Pi ist es möglich, den Inzidenz-Wert auf einem Display auszugeben. Die Ampelfarbe wird per farbiger LED angezeigt.
+Auf einem Raspberry Pi ist es möglich, den Inzidenz-Wert auf einem 4-Digit-Display auszugeben. Die Ampelfarbe wird per farbiger LED angezeigt und der Trend in einer Matrix. Weiterhin wird über einen Servo ein Schild gesteuert, welches sich dreht und anzeigt, von welcher Quelle (RKI oder LGL) der angezeigte Wert stammt.
 
 **Die Hardware-Ampel basiert auf dem folgenden Baukasten (Affiliate-Link):**
 
