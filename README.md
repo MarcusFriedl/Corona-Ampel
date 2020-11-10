@@ -51,3 +51,4 @@ Um das Script auf dem Raspberry zu nutzen, müssen evtl. Packages nachinstallier
 
 Der Code ist sicherlich nicht zu 100% professionell und kann durchaus verbessert werden. Dennoch erfüllt er seinen Zweck.
 Sofern mich jemand unterstützen möchte, gerne per BTC an: 
+Oder damit auch unsere Gastronomie nach dem Lockdown etwas davon hat, spendiert mir ein Bier:
