@@ -49,7 +49,8 @@ Um das Script auf dem Raspberry zu nutzen, müssen evtl. Packages nachinstallier
 
 ## Sonstiges
 
-Der Code ist sicherlich nicht zu 100% professionell und kann durchaus verbessert werden. Dennoch erfüllt er seinen Zweck.
+Der Code ist sicherlich nicht zu 100% professionell und kann durchaus verbessert werden. Dennoch erfüllt er seinen Zweck. Anpassungen und Verbesserungen nehme ich gerne an und lerne davon!  
+
 Sofern mich jemand unterstützen möchte, gerne per BTC an <code>3NAbijqnAxAT5mCSXzxNLzUoLXyjTtcR7P</code>  
 oder per ETH an <code>0x570790cD48676fb49387b1BB160d38181Eeb380c</code>  
 Oder damit auch unsere Gastronomie nach dem Lockdown etwas davon hat, spendiert mir ein Bier :beer:: http://paypal.me/marcusfriedl
