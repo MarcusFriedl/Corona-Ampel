@@ -259,7 +259,7 @@ def download_csv():
 
 def load_csv(file):
     stand = open(PATH + file, 'r')
-    LGL_inzidenz = pd.read_csv(PATH + file, sep=";", decimal=",", skiprows=1, header=None)
+    LGL_inzidenz = pd.read_csv(PATH + file, sep=";", decimal=",", skiprows=1, header=None, skipinitialspace=True)
 
     return stand, LGL_inzidenz
 
